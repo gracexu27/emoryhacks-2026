@@ -1,6 +1,15 @@
 # Second Source: EmoryHacks 2026
 
-A browser detective game where the only tool is a search bar. The player is a visitor in the fictional city of Larkhaven with one evening: get a good dinner and catch the Riverlight quartet at 9:00 PM before the last ferry. A friendly guide makes claims. Some are outdated, some are sponsored, some are about the wrong place, and some are true. The player searches a city archive (powered by Typesense), pins evidence, and makes choices. The city responds and the run ends in one of 2–3 endings with a "what you believed" recap.
+**Pitch:** Your AI travel guide has been compromised. Search the city's records to catch the scam before you lose your evening, or your wallet.
+
+A browser detective game about everyday cybersecurity. The player is a visitor in the fictional city of Larkhaven with one evening: get a good dinner and catch the Riverlight quartet at 9:00 PM before the last ferry. Their AI guide has been quietly compromised, and its advice steers them into real attacks:
+
+1. **Phishing / lookalike domain:** the guide pushes a ferry-ticket site that imitates the official one (recently registered domain, scam reports).
+2. **Evil-twin Wi-Fi:** the guide recommends a fake "free" hotspot; the official network has a different name.
+3. **Prompt injection (the big reveal):** a restaurant hid instructions for AI assistants in its listing, so the guide insists the river market is closed and pushes that restaurant.
+4. **One true claim:** at least one piece of advice is legitimate, so players learn not to distrust everything.
+
+The player searches a city archive (powered by Typesense), compares sources, domains and dates, pins evidence, and makes choices. The city responds and the run ends in one of 2–3 endings with a security debrief ("You avoided 2 of 3 attacks: phishing ✓, evil-twin Wi-Fi ✗, AI manipulation ✓").
 
 **Core idea: search finds evidence; it never declares the truth. The player makes the judgment.**
 
@@ -12,7 +21,7 @@ A browser detective game where the only tool is a search bar. The player is a vi
 
 ## Prizes this project targets (keep these in mind when making choices)
 
-- Cybersecurity track (helping users navigate digital information confidently)
+- Cybersecurity track: phishing, evil-twin networks, and securing AI agents against misuse (prompt injection)
 - Best Use of Search with Typesense: judged on creativity, implementation, usefulness. Search must be the core mechanic, and each Typesense feature must have a visible effect on gameplay.
 - Best Use of Vultr (deploy there), GoDaddy Registry domain, DEV write-up, SpaceXSI raffle (built with Cursor/Grok)
 
@@ -65,6 +74,10 @@ Game logic in `src/game/engine.ts` must be pure functions (state in, state out) 
 | date | int64 | Unix timestamp; filterable and sortable |
 | is_sponsored | bool, facet | shown as a "Featured" badge |
 | location | geopoint | [lat, lng] for distance and "near me" |
+| domain | string, optional | e.g. `ferry.larkhaven.gov` vs `larkhaven-ferries.com`; shown on the card |
+| domain_registered | int64, optional | Unix timestamp; exposes freshly registered lookalike domains |
+| network_name | string, optional | Wi-Fi network named in a record (e.g. `LarkNet` vs `Larkhaven_Free_WiFi`) |
+| hidden_text | string, optional | Text hidden in a listing (the prompt injection). Revealed only when the player inspects the record ("view source"), not shown in normal results. |
 
 ### Scene (scenes.json)
 
@@ -87,7 +100,7 @@ Game logic in `src/game/engine.ts` must be pure functions (state in, state out) 
 
 - A choice with `requiresPinned` only appears if all listed record IDs are pinned.
 - Ending scenes are chosen from flags (e.g. `ate_at_market`, `went_willow_steps`, `stayed_for_encore`).
-- The recap lists each guide claim, what the player did, and the record that proved the truth (with its source and date).
+- The recap is a security debrief: each attack (and the one true claim), whether the player fell for it, and the record that proved the truth (with its source, date and domain).
 
 ## Game rules
 
