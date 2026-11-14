@@ -82,5 +82,21 @@
     "source_group": "people",
     "date": 1780272000,
     "is_sponsored": false
+  },
+  {
+    "id": "todo-official-poster",
+    "title": "TODO-CONTENT Official ferry poster",
+    "excerpt": "TODO-CONTENT Replace with the authored poster record and real image.",
+    "tags": [
+      "ferry",
+      "poster",
+      "qr"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "official",
+    "source_group": "official",
+    "date": 1794528000,
+    "is_sponsored": false,
+    "image_url": "/archive-images/todo-poster.png"
   }
 ]

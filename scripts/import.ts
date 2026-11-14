@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { loadEnvFile } from 'node:process'
 import Typesense from 'typesense'
 
@@ -29,18 +30,46 @@ const schema = {
     { name: 'date', type: 'int64', sort: true },
     { name: 'is_sponsored', type: 'bool', facet: true },
     { name: 'location', type: 'geopoint', optional: true },
+    { name: 'domain', type: 'string', optional: true },
+    { name: 'domain_registered', type: 'int64', optional: true },
+    { name: 'image_url', type: 'string', optional: true, index: false },
+    // Image search: Typesense embeds `image` with CLIP; the raw image is not stored.
+    { name: 'image', type: 'image', optional: true, store: false },
+    {
+      name: 'embedding',
+      type: 'float[]',
+      optional: true,
+      embed: { from: ['image'], model_config: { model_name: 'ts/clip-vit-b-p32' } },
+    },
   ],
+  // Voice search: Typesense transcribes voice_query audio with Whisper.
+  voice_query_model: { model_name: 'ts/whisper/base.en' },
 } as const
 
-async function main() {
-  const existing = await client.collections().retrieve()
-  if (!existing.some((collection) => collection.name === 'archive')) {
-    await client.collections().create({ ...schema, fields: [...schema.fields] })
+// image_url is served from public/, so "/archive-images/x.jpg" lives at "public/archive-images/x.jpg".
+async function withImage(record: { id: string; image_url?: string }) {
+  if (!record.image_url) return record
+  const file = join('public', record.image_url)
+  try {
+    return { ...record, image: (await readFile(file)).toString('base64') }
+  } catch {
+    throw new Error(`Record "${record.id}": image file not found at ${file}`)
   }
+}
+
+async function main() {
+  // Recreate every run so schema changes always apply; records.json is the source of truth.
+  const existing = await client.collections().retrieve()
+  if (existing.some((collection) => collection.name === 'archive')) {
+    await client.collections('archive').delete()
+  }
+  console.log('Creating collection (first run downloads the CLIP + Whisper models, ~1 min)…')
+  await client.collections().create({ ...schema, fields: [...schema.fields] })
 
   const records = JSON.parse(await readFile('content/records.json', 'utf8'))
   if (!Array.isArray(records)) throw new Error('content/records.json must be an array')
-  const imported = await client.collections('archive').documents().import(records, { action: 'upsert' })
+  const documents = await Promise.all(records.map(withImage))
+  const imported = await client.collections('archive').documents().import(documents, { action: 'upsert' })
   const failures = imported.filter((result) => !result.success)
   if (failures.length) throw new Error(`Import failed for ${failures.length} record(s): ${JSON.stringify(failures)}`)
 

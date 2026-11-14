@@ -95,3 +95,4 @@ p { line-height: 1.6; }
 .recap-list { padding-left: 1.2rem; }
 .recap-list span, .recap-meta { color: var(--muted); }
 .primary-button { padding: .7rem 1.2rem; font-size: 1rem; border-radius: 6px; border: 0; background: var(--accent); color: #0b121a; font-weight: 600; cursor: pointer; }
+.result-image { display: block; width: 100%; max-height: 10rem; object-fit: cover; border-radius: 4px; margin-top: .5rem; }

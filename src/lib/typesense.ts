@@ -15,6 +15,9 @@ export type ArchiveRecord = {
   date: number
   is_sponsored: boolean
   location?: [number, number]
+  domain?: string
+  domain_registered?: number
+  image_url?: string
 }
 
 export type SearchFilters = {
@@ -69,6 +72,7 @@ export async function multiSearchArchive(query: string, filters: SearchFilters):
       q: query,
       query_by: 'title,excerpt,tags,source_name',
       filter_by: buildFilter(group, filters),
+      exclude_fields: 'embedding',
       per_page: 10,
     })),
   })

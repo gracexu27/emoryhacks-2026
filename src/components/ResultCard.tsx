@@ -19,6 +19,7 @@ export function ResultCard({ record, pinned, onTogglePin }: Props) {
           {dateFormat.format(new Date(record.date * 1000))}
         </span>
       </div>
+      {record.image_url && <img className="result-image" src={record.image_url} alt="" loading="lazy" />}
       <h3>{record.title}</h3>
       <p>{record.excerpt}</p>
       <footer>

@@ -87,6 +87,11 @@ Game logic in `src/game/engine.ts` must be pure functions (state in, state out) 
 | location | geopoint | [lat, lng] for distance and "near me" |
 | domain | string, optional | e.g. `ferry.larkhaven.gov` vs `larkhaven-ferries.com`; shown on the card |
 | domain_registered | int64, optional | Unix timestamp; exposes freshly registered lookalike domains |
+| image_url | string, optional | e.g. `/archive-images/ferry-poster.jpg`. File lives in `public/archive-images/`; shown on the card and read by the import script |
+| image | image, optional, `store: false` | Not in records.json. The import script fills it with the base64 of `image_url`'s file; Typesense only uses it to build `embedding` |
+| embedding | float[], optional, auto | CLIP (`ts/clip-vit-b-p32`) embedding of `image`. Powers image search; always excluded from search responses |
+
+The collection also sets `voice_query_model: ts/whisper/base.en` for voice search. Voice queries must be base64 16 kHz 16-bit mono WAV sent via multi-search; the transcription comes back in `request_params.voice_query.transcribed_query`. The import script drops and recreates `archive` on every run, so `records.json` is the single source of truth.
 | network_name | string, optional | Wi-Fi network named in a record (e.g. `LarkNet` vs `Larkhaven_Free_WiFi`) |
 | hidden_text | string, optional | Text hidden in a listing (the prompt injection). Revealed only when the player inspects the record ("view source"), not shown in normal results. |
 
