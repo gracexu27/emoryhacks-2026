@@ -1,0 +1,72 @@
+[
+  {
+    "id": "todo-official-ferry",
+    "title": "TODO-CONTENT Ferry information",
+    "excerpt": "TODO-CONTENT Replace with an authored official record.",
+    "tags": [
+      "ferry",
+      "boat"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "official",
+    "source_group": "official",
+    "date": 1794528000,
+    "is_sponsored": false
+  },
+  {
+    "id": "todo-official-network",
+    "title": "TODO-CONTENT Network information",
+    "excerpt": "TODO-CONTENT Replace with an authored official record.",
+    "tags": [
+      "wifi",
+      "network"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "official",
+    "source_group": "official",
+    "date": 1794528000,
+    "is_sponsored": false
+  },
+  {
+    "id": "todo-visitor-ferry",
+    "title": "TODO-CONTENT Visitor ferry note",
+    "excerpt": "TODO-CONTENT Replace with an authored visitor record.",
+    "tags": [
+      "ferry",
+      "visitor"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "visitor",
+    "source_group": "people",
+    "date": 1794528000,
+    "is_sponsored": false
+  },
+  {
+    "id": "todo-place-market",
+    "title": "TODO-CONTENT Market listing",
+    "excerpt": "TODO-CONTENT Replace with an authored place listing.",
+    "tags": [
+      "market",
+      "food"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "listing",
+    "source_group": "places",
+    "date": 1794528000,
+    "is_sponsored": false
+  },
+  {
+    "id": "todo-place-restaurant",
+    "title": "TODO-CONTENT Restaurant listing",
+    "excerpt": "TODO-CONTENT Replace with an authored place listing.",
+    "tags": [
+      "restaurant",
+      "dinner"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "listing",
+    "source_group": "places",
+    "date": 1794528000,
+    "is_sponsored": true
+  }
+]
