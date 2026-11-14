@@ -4,6 +4,7 @@ import {
   searchIsConfigured,
   SOURCE_GROUPS,
   SOURCE_TYPES,
+  type ArchiveRecord,
   type GroupedResults,
   type SourceGroup,
   type SourceType,
@@ -16,7 +17,13 @@ const COLUMN_TITLES: Record<SourceGroup, string> = {
   places: 'Nearby places',
 }
 
-export function SearchPanel() {
+type Props = {
+  onSearch: () => void // a submitted search costs in-game time
+  isPinned: (id: string) => boolean
+  onTogglePin: (record: ArchiveRecord) => void
+}
+
+export function SearchPanel({ onSearch, isPinned, onTogglePin }: Props) {
   const [query, setQuery] = useState('')
   const [recentOnly, setRecentOnly] = useState(false)
   const [sourceTypes, setSourceTypes] = useState<SourceType[]>([])
@@ -42,7 +49,10 @@ export function SearchPanel() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    runSearch(query.trim(), { recentOnly, sourceTypes })
+    const q = query.trim()
+    if (!q) return
+    onSearch()
+    runSearch(q, { recentOnly, sourceTypes })
   }
 
   // Changing a filter re-runs the last search so the effect is visible immediately.
@@ -110,7 +120,9 @@ export function SearchPanel() {
               {results[group].length === 0 ? (
                 <p className="empty">Nothing here for “{lastQuery}”.</p>
               ) : (
-                results[group].map((record) => <ResultCard key={record.id} record={record} />)
+                results[group].map((record) => (
+                  <ResultCard key={record.id} record={record} pinned={isPinned(record.id)} onTogglePin={onTogglePin} />
+                ))
               )}
             </div>
           ))}

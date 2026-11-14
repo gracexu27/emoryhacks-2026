@@ -31,10 +31,17 @@ The player searches the town archive (powered by Typesense), compares sources, d
 
 ## Scope (do not expand without asking me)
 
-- ONE neighborhood, THREE guide claims, 40–60 archive records, 2–3 endings.
+- ONE neighborhood, FOUR beats (3 attacks + 1 true claim), 40–60 archive records, 2–3 endings.
 - No AI-generated answers or LLM calls inside the game. All content is hand-authored in data files.
 - A complete, polished mystery beats more map area or more features.
-- Stretch goals (only after a full run works end to end): map view with geo search, searches costing time by vagueness, multiple run goals, guide trust meter.
+- **Every beat must be solvable with plain text search.** Geo, image and voice are the intended way to crack their beat, but each needs a text-search fallback record so cutting a feature never breaks the story.
+- **Feature tiers** (build in this order; cut from the bottom):
+  1. Core: text search + multi-search + filters + synonyms; beats 2 (prompt injection) and 4 (true claim) work via text.
+  2. Geo search for beat 3 (evil-twin Wi-Fi): simple map / distance-sorted hotspot list.
+  3. Image search for beat 1 (QR phishing) via Typesense CLIP.
+  4. Voice search for beat 4 via Typesense Whisper. Most likely to be cut.
+- **Cut checkpoint:** spike image + voice right after Milestone 4. Anything not working by Saturday ~4 PM is cut.
+- Stretch goals (only after a full run works end to end): searches costing time by vagueness, multiple run goals, guide trust meter, live Ping via conversational search.
 
 ## Stack
 
@@ -103,7 +110,10 @@ Game logic in `src/game/engine.ts` must be pure functions (state in, state out) 
 ```
 
 - A choice with `requiresPinned` only appears if all listed record IDs are pinned.
-- Ending scenes are chosen from flags (e.g. `ate_at_market`, `went_willow_steps`, `stayed_for_encore`).
+- A choice with `"endsRun": true` (instead of `next`) ends the run.
+- `scenes.json` shape: `{ "start": "<scene id>", "scenes": [...], "endings": [...] }`.
+- Endings are chosen from flags: `{ "id", "title", "text", "requiresFlags": [] }`. The first ending whose flags are all set wins, so order them most-specific first and end with a catch-all (empty `requiresFlags`).
+- Each beat sets its own outcome flag (e.g. `avoided_phishing`, `fell_for_phishing`); the debrief reads these flags rather than needing one ending per combination.
 - The recap is a security debrief: each attack (and the one true claim), whether the player fell for it, and the record that proved the truth (with its source, date and domain).
 
 ## Game rules
