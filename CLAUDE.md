@@ -116,6 +116,8 @@ The collection also sets `voice_query_model: ts/whisper/base.en` for voice searc
 
 - A choice with `requiresPinned` only appears if all listed record IDs are pinned.
 - A choice with `"endsRun": true` (instead of `next`) ends the run.
+- A scene may have `"location": [lat, lng]`: where the player stands. Scenes without one keep the previous location. It drives "Near me" (radius in `content/settings.json`), distance badges, and the "You" dot on the map.
+- The map is a plain SVG schematic of the bounds in `content/settings.json` (`map.south/north/west/east`). All record and scene coordinates must fall inside those bounds.
 - `scenes.json` shape: `{ "start": "<scene id>", "scenes": [...], "endings": [...] }`.
 - Endings are chosen from flags: `{ "id", "title", "text", "requiresFlags": [] }`. The first ending whose flags are all set wins, so order them most-specific first and end with a catch-all (empty `requiresFlags`).
 - Each beat sets its own outcome flag (e.g. `avoided_phishing`, `fell_for_phishing`); the debrief reads these flags rather than needing one ending per combination.

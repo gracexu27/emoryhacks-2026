@@ -55,6 +55,7 @@ function App() {
 
       <div className="workspace">
         <SearchPanel
+          origin={state.location}
           onSearch={() => dispatch({ type: 'search' })}
           isPinned={(id) => isPinned(state, id)}
           onTogglePin={(record) => dispatch({ type: 'togglePin', record })}

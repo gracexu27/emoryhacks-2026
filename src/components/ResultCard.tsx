@@ -1,9 +1,14 @@
-import { RECENT_CUTOFF, type ArchiveRecord } from '../lib/typesense'
+import { formatDistance, RECENT_CUTOFF, type ArchiveHit, type ArchiveRecord } from '../lib/typesense'
 
 const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 
+// Pins store the record itself, not a distance that was only true at search time.
+function stripDistance({ distance_m: _distance, ...record }: ArchiveHit): ArchiveRecord {
+  return record
+}
+
 type Props = {
-  record: ArchiveRecord
+  record: ArchiveHit
   pinned: boolean
   onTogglePin: (record: ArchiveRecord) => void
 }
@@ -18,13 +23,14 @@ export function ResultCard({ record, pinned, onTogglePin }: Props) {
         <span className={`badge badge-date${isOld ? ' is-old' : ''}`}>
           {dateFormat.format(new Date(record.date * 1000))}
         </span>
+        {record.distance_m !== undefined && <span className="badge badge-distance">{formatDistance(record.distance_m)}</span>}
       </div>
       {record.image_url && <img className="result-image" src={record.image_url} alt="" loading="lazy" />}
       <h3>{record.title}</h3>
       <p>{record.excerpt}</p>
       <footer>
         <span>{record.source_name}</span>
-        <button type="button" className="pin-button" aria-pressed={pinned} onClick={() => onTogglePin(record)}>
+        <button type="button" className="pin-button" aria-pressed={pinned} onClick={() => onTogglePin(stripDistance(record))}>
           {pinned ? 'Pinned' : 'Pin'}
         </button>
       </footer>

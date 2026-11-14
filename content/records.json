@@ -11,7 +11,11 @@
     "source_type": "official",
     "source_group": "official",
     "date": 1794528000,
-    "is_sponsored": false
+    "is_sponsored": false,
+    "location": [
+      36.9985,
+      -150.001
+    ]
   },
   {
     "id": "todo-official-network",
@@ -53,7 +57,11 @@
     "source_type": "listing",
     "source_group": "places",
     "date": 1794528000,
-    "is_sponsored": false
+    "is_sponsored": false,
+    "location": [
+      37.002,
+      -149.999
+    ]
   },
   {
     "id": "todo-place-restaurant",
@@ -67,7 +75,11 @@
     "source_type": "listing",
     "source_group": "places",
     "date": 1794528000,
-    "is_sponsored": true
+    "is_sponsored": true,
+    "location": [
+      37.0005,
+      -150.003
+    ]
   },
   {
     "id": "todo-visitor-ferry-old",
@@ -97,6 +109,65 @@
     "source_group": "official",
     "date": 1794528000,
     "is_sponsored": false,
-    "image_url": "/archive-images/todo-poster.png"
+    "image_url": "/archive-images/todo-poster.png",
+    "location": [
+      36.9988,
+      -150.0005
+    ]
+  },
+  {
+    "id": "todo-official-wifi-1",
+    "title": "TODO-CONTENT Official Wi-Fi hotspot A",
+    "excerpt": "TODO-CONTENT Replace with the authored official hotspot record (CityNet_Public).",
+    "tags": [
+      "wifi",
+      "wi-fi",
+      "hotspot",
+      "internet"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "official",
+    "source_group": "official",
+    "date": 1794528000,
+    "is_sponsored": false,
+    "location": [
+      36.9992,
+      -150.0015
+    ]
+  },
+  {
+    "id": "todo-official-wifi-2",
+    "title": "TODO-CONTENT Official Wi-Fi hotspot B",
+    "excerpt": "TODO-CONTENT Replace with the authored official hotspot record (CityNet_Public).",
+    "tags": [
+      "wifi",
+      "wi-fi",
+      "hotspot",
+      "internet"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "official",
+    "source_group": "official",
+    "date": 1794528000,
+    "is_sponsored": false,
+    "location": [
+      37.0035,
+      -149.996
+    ]
+  },
+  {
+    "id": "todo-visitor-wifi",
+    "title": "TODO-CONTENT Visitor post about free Wi-Fi",
+    "excerpt": "TODO-CONTENT Replace with the authored visitor post mentioning the fake network.",
+    "tags": [
+      "wifi",
+      "wi-fi",
+      "free"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "visitor",
+    "source_group": "people",
+    "date": 1794528000,
+    "is_sponsored": false
   }
 ]

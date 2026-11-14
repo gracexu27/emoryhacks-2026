@@ -1,5 +1,5 @@
 // Pure game logic: state in, state out. No React, no fetching.
-import type { ArchiveRecord } from '../lib/typesense'
+import type { ArchiveRecord, LatLng } from '../lib/typesense'
 
 export type Choice = {
   label: string
@@ -14,6 +14,7 @@ export type Scene = {
   id: string
   text: string
   guide: string
+  location?: LatLng // where the player stands; scenes without one keep the previous location
   choices: Choice[]
 }
 
@@ -37,13 +38,15 @@ export type GameState = {
   flags: string[]
   searches: number
   endingId: string | null
+  location: LatLng | null
 }
 
 export const START_MINUTES = 18 * 60 + 30 // 6:30 PM
 export const SEARCH_COST = 5
 
 export function initialState(story: Story): GameState {
-  return { sceneId: story.start, minutes: START_MINUTES, pins: [], flags: [], searches: 0, endingId: null }
+  const location = story.scenes.find((s) => s.id === story.start)?.location ?? null
+  return { sceneId: story.start, minutes: START_MINUTES, pins: [], flags: [], searches: 0, endingId: null, location }
 }
 
 export function getScene(story: Story, id: string): Scene {
@@ -82,7 +85,8 @@ export function choose(state: GameState, story: Story, choice: Choice): GameStat
   const minutes = state.minutes + choice.timeCost
   if (choice.endsRun) return { ...state, minutes, flags, endingId: pickEnding(story, flags).id }
   if (!choice.next) throw new Error(`Choice "${choice.label}" needs either next or endsRun`)
-  return { ...state, minutes, flags, sceneId: choice.next }
+  const location = getScene(story, choice.next).location ?? state.location
+  return { ...state, minutes, flags, sceneId: choice.next, location }
 }
 
 export function formatClock(minutes: number): string {

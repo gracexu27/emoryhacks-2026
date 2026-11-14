@@ -5,6 +5,10 @@
       "id": "todo-start",
       "text": "TODO-CONTENT Opening narration. The player arrives in town.",
       "guide": "TODO-CONTENT Ping makes its first claim about the ferry.",
+      "location": [
+        37.001,
+        -150.004
+      ],
       "choices": [
         {
           "label": "TODO-CONTENT Walk to the harbor",
@@ -17,19 +21,29 @@
       "id": "todo-harbor",
       "text": "TODO-CONTENT Narration at the harbor.",
       "guide": "TODO-CONTENT Ping repeats its advice.",
+      "location": [
+        36.999,
+        -150.001
+      ],
       "choices": [
         {
           "label": "TODO-CONTENT Take Ping's advice",
           "endsRun": true,
           "timeCost": 10,
-          "setsFlags": ["fell_for_placeholder"]
+          "setsFlags": [
+            "fell_for_placeholder"
+          ]
         },
         {
           "label": "TODO-CONTENT Use the official ferry info instead",
           "endsRun": true,
           "timeCost": 10,
-          "requiresPinned": ["todo-official-ferry"],
-          "setsFlags": ["avoided_placeholder"]
+          "requiresPinned": [
+            "todo-official-ferry"
+          ],
+          "setsFlags": [
+            "avoided_placeholder"
+          ]
         }
       ]
     }
@@ -39,7 +53,9 @@
       "id": "todo-ending-good",
       "title": "TODO-CONTENT Good ending",
       "text": "TODO-CONTENT The player checked the source and it paid off.",
-      "requiresFlags": ["avoided_placeholder"]
+      "requiresFlags": [
+        "avoided_placeholder"
+      ]
     },
     {
       "id": "todo-ending-default",

@@ -96,3 +96,18 @@ p { line-height: 1.6; }
 .recap-list span, .recap-meta { color: var(--muted); }
 .primary-button { padding: .7rem 1.2rem; font-size: 1rem; border-radius: 6px; border: 0; background: var(--accent); color: #0b121a; font-weight: 600; cursor: pointer; }
 .result-image { display: block; width: 100%; max-height: 10rem; object-fit: cover; border-radius: 4px; margin-top: .5rem; }
+
+/* Geo: distance badge, near-me toggle, map */
+.badge-distance { color: var(--accent); text-transform: none; }
+.toggle.is-disabled { opacity: .5; cursor: default; }
+.hint { color: var(--muted); font-size: .8rem; }
+.map { margin: 0 0 1rem; }
+.map svg { display: block; width: 100%; max-height: 18rem; border: 1px solid var(--line); border-radius: 8px; }
+.map-bg { fill: #0c1620; }
+.map-radius { fill: rgba(139, 199, 200, .08); stroke: var(--accent); stroke-dasharray: 4 4; }
+.map-pin circle { stroke: #0c1620; stroke-width: 2; }
+.map-pin text, .map-you text { font-size: 10px; fill: #e9eef4; }
+.map-pin-official circle { fill: #9fd3a8; }
+.map-pin-people circle { fill: #e3b3d6; }
+.map-pin-places circle { fill: #d8cf9a; }
+.map-you circle { fill: #ffffff; stroke: var(--accent); stroke-width: 3; }

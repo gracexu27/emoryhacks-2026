@@ -1,4 +1,12 @@
 {
   "gameToday": "2026-11-14T00:00:00Z",
-  "recentDays": 30
+  "recentDays": 30,
+  "nearMeRadiusKm": 0.5,
+  "map": {
+    "_note": "TODO-CONTENT placeholder ~1 km box in open ocean. Town coordinates in records/scenes must fall inside it.",
+    "south": 36.995,
+    "north": 37.005,
+    "west": -150.006,
+    "east": -149.994
+  }
 }
