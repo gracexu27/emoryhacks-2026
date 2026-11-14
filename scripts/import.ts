@@ -3,7 +3,9 @@ import { join } from 'node:path'
 import { loadEnvFile } from 'node:process'
 import Typesense from 'typesense'
 
-loadEnvFile('.env')
+// ENV_FILE lets the deploy import target the server (through an SSH tunnel) without touching .env
+const envFile = process.env.ENV_FILE || '.env'
+loadEnvFile(envFile)
 
 const adminKey = process.env.TYPESENSE_ADMIN_KEY
 if (!adminKey) throw new Error('Set TYPESENSE_ADMIN_KEY in .env')
@@ -94,9 +96,9 @@ async function main() {
       actions: ['documents:search'],
       collections: ['archive'],
     })
-    const env = await readFile('.env', 'utf8')
-    await writeFile('.env', env.replace(/^VITE_TYPESENSE_SEARCH_KEY=.*$/m, `VITE_TYPESENSE_SEARCH_KEY=${key.value}`))
-    console.log('Created a search-only browser key in .env')
+    const env = await readFile(envFile, 'utf8')
+    await writeFile(envFile, env.replace(/^VITE_TYPESENSE_SEARCH_KEY=.*$/m, `VITE_TYPESENSE_SEARCH_KEY=${key.value}`))
+    console.log(`Created a search-only browser key in ${envFile}`)
   }
   console.log(`Imported ${imported.length} archive records`)
 }

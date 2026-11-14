@@ -63,6 +63,7 @@ function getClient() {
       host,
       port: Number(import.meta.env.VITE_TYPESENSE_PORT || '8108'),
       protocol: import.meta.env.VITE_TYPESENSE_PROTOCOL || 'http',
+      path: import.meta.env.VITE_TYPESENSE_PATH || '', // e.g. "/typesense" behind nginx in production
     }],
     apiKey: key,
     connectionTimeoutSeconds: 5,
