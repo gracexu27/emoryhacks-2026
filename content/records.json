@@ -68,5 +68,19 @@
     "source_group": "places",
     "date": 1794528000,
     "is_sponsored": true
+  },
+  {
+    "id": "todo-visitor-ferry-old",
+    "title": "TODO-CONTENT Old visitor ferry note",
+    "excerpt": "TODO-CONTENT Replace with an authored outdated visitor record.",
+    "tags": [
+      "ferry",
+      "boat"
+    ],
+    "source_name": "TODO-CONTENT",
+    "source_type": "visitor",
+    "source_group": "people",
+    "date": 1780272000,
+    "is_sponsored": false
   }
 ]
