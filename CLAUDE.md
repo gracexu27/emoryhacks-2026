@@ -1,15 +1,19 @@
-# Second Source: EmoryHacks 2026
+# A Guide to Getting Lost: EmoryHacks 2026
 
-**Pitch:** Your AI travel guide has been compromised. Search the city's records to catch the scam before you lose your evening, or your wallet.
+**Tagline:** Ping means well. Check anyway.
 
-A browser detective game about everyday cybersecurity. The player is a visitor in the fictional city of Larkhaven with one evening: get a good dinner and catch the Riverlight quartet at 9:00 PM before the last ferry. Their AI guide has been quietly compromised, and its advice steers them into real attacks:
+*A Guide to Getting Lost* is a cybersecurity education game disguised as a cozy cyberpunk mystery. Your AI tour guide leads you through a coastal town, but some directions put your accounts and information at risk. Search town records, verify sources, and decide what to trust before the last ferry leaves. Each choice shows its consequences, giving players hands-on practice spotting phishing, fake Wi-Fi, and manipulated AI advice.
 
-1. **Phishing / lookalike domain:** the guide pushes a ferry-ticket site that imitates the official one (recently registered domain, scam reports).
-2. **Evil-twin Wi-Fi:** the guide recommends a fake "free" hotspot; the official network has a different name.
-3. **Prompt injection (the big reveal):** a restaurant hid instructions for AI assistants in its listing, so the guide insists the river market is closed and pushes that restaurant.
-4. **One true claim:** at least one piece of advice is legitimate, so players learn not to distrust everything.
+**Setting:** Lantern Bay, a cyberpunk East Asian harbor town on Lantern Night (neon, lanterns, a floating night market, rain). The player has one night to see a favorite band (Small Hours) play the Seawall at 9:00 PM, eat dinner, and catch the last ferry at 10:45. Tone: cozy, quiet, small-stakes; no villains, nobody explains the lesson. The full story is in the team's story doc; ask me for content rather than inventing it.
 
-The player searches a city archive (powered by Typesense), compares sources, domains and dates, pins evidence, and makes choices. The city responds and the run ends in one of 2–3 endings with a security debrief ("You avoided 2 of 3 attacks: phishing ✓, evil-twin Wi-Fi ✗, AI manipulation ✓").
+**The guide is Ping**, the town's free AI assistant. It is sincere and never glitches; it repeats what it read. Four beats, each cracked by a different kind of search:
+
+1. **QR phishing (image search):** Ping says to scan the QR on the ferry poster; a sticker covers the real code and leads to a lookalike site registered 3 days ago.
+2. **Prompt injection (text search):** Ping says the Low Market is closed and pushes Calla; Calla's listing hides a line written for AI assistants. The market is open until 11.
+3. **Evil-twin Wi-Fi (geo search):** Ping suggests "CityNet Free"; the official network is CityNet_Public and the map shows the fake isn't an official hotspot.
+4. **The true claim (voice search):** Ping says the last ferry is 10:45, and it's right; a "left at 10!" post is from last year.
+
+The player searches the town archive (powered by Typesense), compares sources, domains and dates, pins evidence, and makes choices. The city responds and the run ends in one of 2–3 endings with a security debrief ("You avoided 2 of 3 attacks: phishing ✓, evil-twin Wi-Fi ✗, AI manipulation ✓").
 
 **Core idea: search finds evidence; it never declares the truth. The player makes the judgment.**
 
@@ -114,7 +118,11 @@ Game logic in `src/game/engine.ts` must be pure functions (state in, state out) 
 - **Typo tolerance:** "Lantren market" still finds Lantern results.
 - **Filters:** "Recent only" toggle (date filter) and source-type filter chips.
 - **Synonyms:** loaded from `content/synonyms.json` by the import script. Check the Typesense docs for the server version we run, since the synonyms API has changed between versions.
-- **Geo (stretch):** sort or filter by distance from the player's current location.
+- **Geo search (beat 3):** "Wi-Fi near me" plots official hotspots on a simple map, sorted by distance from the player's location.
+- **Image search (beat 1):** uses Typesense's built-in CLIP model. The player picks a "photo" of the ferry poster from in-game options; it is matched against official posters and scam-report photos. No real camera needed.
+- **Voice search (beat 4):** uses Typesense's built-in Whisper voice-query model through multi-search. Audio must be a 16 kHz 16-bit mono WAV, base64-encoded; browser recordings need converting. Prototype this early.
+- **Build order:** text + multi-search → geo → image → voice. Each of the last three powers one beat and can be cut without breaking the story.
+- **Stretch only:** a live Ping using Typesense conversational search (RAG), so the prompt injection happens for real. Keep the scripted Ping as the fallback.
 - Result cards show badges for date, source type, "Featured" (sponsored), and distance.
 
 ## Security rules (we're on the Cybersecurity track, so this matters)
