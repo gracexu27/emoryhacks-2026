@@ -83,7 +83,11 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 
 ## Scene and game rules
 
-- `content/scenes.json` has `{ "start", "scenes", "endings" }`. A choice has a `next` scene or `endsRun: true`, a `timeCost`, and may have `requiresPinned` and `setsFlags`. Ending order runs most-specific first, then a catch-all.
+- `content/scenes.json` has `{ "start", "scenes", "endings", "debrief" }`. A choice has a `next` scene or `endsRun: true`, a `timeCost`, and may have `requiresPinned` and `setsFlags`. Ending order runs most-specific first, then a catch-all.
+- A scene may set `place` (HUD location name) and `location` (map coordinates); scenes without them keep the previous values.
+- The route is ferry → dinner → Wi-Fi → encore. Outcome flags: `avoided_phishing`/`fell_for_phishing`, `avoided_injection`/`fell_for_injection`, `avoided_evil_twin`/`fell_for_evil_twin`, `trusted_true_claim`/`doubted_true_claim`.
+- `debrief` has one entry per claim: `title`, `claim` (Ping's words), `outcomes` (`flag`, `safe`, `text`; first matching flag wins) and `evidence` (record ids, shown with source and date, marked if the player pinned them).
+- In dev, the browser console warns about broken scene links, unknown record ids, and flags no choice sets.
 - The clock starts at 6:30 PM; the last ferry leaves at 10:45 PM. Each submitted archive search costs five in-game minutes; scene choices can have their own time costs.
 - A player can discover and pin the ferry timetable early, then use it at the show without another search.
 - Clicking a scene object can open a phone panel or record. Searching the archive finds related evidence. Do not reveal the verdict merely by clicking a hotspot.

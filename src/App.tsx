@@ -1,5 +1,7 @@
 import { useEffect, useReducer, useState } from 'react'
 import storyData from '../content/scenes.json'
+import recordsData from '../content/records.json'
+import type { ArchiveRecord } from './lib/typesense'
 import {
   availableChoices,
   gameReducer,
@@ -18,11 +20,13 @@ import { SearchPanel } from './components/SearchPanel'
 
 type Panel = 'archive' | 'notebook' | 'pause' | 'pier' | null
 
-const story = storyData as Story
+const story = storyData as unknown as Story
 const reducer = gameReducer(story)
+// Records are bundled only for the end-of-run debrief; gameplay finds them through search.
+const records = new Map((recordsData as ArchiveRecord[]).map((record) => [record.id, record]))
 
 if (import.meta.env.DEV) {
-  const problems = validateStory(story)
+  const problems = validateStory(story, new Set(records.keys()))
   if (problems.length) console.warn('scenes.json problems:\n' + problems.join('\n'))
 }
 
@@ -67,7 +71,7 @@ function App() {
 
       {started && (
         <>
-          <div className="map-location" aria-hidden="true"><span className="location-mark">✦</span> Lantern Bay <span className="location-divider">/</span> Upper Station</div>
+          <div className="map-location" aria-hidden="true"><span className="location-mark">✦</span> Lantern Bay <span className="location-divider">/</span> {state.place}</div>
           <nav className="game-toolbar" aria-label="Game controls">
             <div className="clock-chip"><span className="weather-glyph" aria-hidden="true">☂</span><Clock minutes={state.minutes} /></div>
             <button type="button" className="toolbar-button" onClick={() => setPanel('archive')} aria-label="Open archive search"><span aria-hidden="true">⌕</span><span>Archive</span></button>
@@ -106,7 +110,7 @@ function App() {
 
       {started && ending && (
         <div className="overlay-backdrop ending-backdrop">
-          <div className="game-window ending-window"><EndingRecap ending={ending} state={state} onRestart={restart} /></div>
+          <div className="game-window ending-window"><EndingRecap ending={ending} state={state} story={story} records={records} onRestart={restart} /></div>
         </div>
       )}
 

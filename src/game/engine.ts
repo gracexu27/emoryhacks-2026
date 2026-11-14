@@ -14,6 +14,7 @@ export type Scene = {
   id: string
   text: string
   guide: string
+  place?: string // place name shown in the HUD; scenes without one keep the previous place
   location?: LatLng // where the player stands; scenes without one keep the previous location
   choices: Choice[]
 }
@@ -25,10 +26,21 @@ export type Ending = {
   requiresFlags: string[]
 }
 
+// One row of the end-of-run debrief: a claim Ping made, how the player handled it, and the evidence.
+export type DebriefOutcome = { flag: string; safe: boolean; text: string }
+export type DebriefBeat = {
+  id: string
+  title: string
+  claim: string
+  outcomes: DebriefOutcome[] // the first outcome whose flag is set is shown
+  evidence: string[] // record ids
+}
+
 export type Story = {
   start: string
   scenes: Scene[]
   endings: Ending[]
+  debrief?: DebriefBeat[]
 }
 
 export type GameState = {
@@ -39,14 +51,24 @@ export type GameState = {
   searches: number
   endingId: string | null
   location: LatLng | null
+  place: string // HUD place name, carried forward like location
 }
 
 export const START_MINUTES = 18 * 60 + 30 // 6:30 PM
 export const SEARCH_COST = 5
 
 export function initialState(story: Story): GameState {
-  const location = story.scenes.find((s) => s.id === story.start)?.location ?? null
-  return { sceneId: story.start, minutes: START_MINUTES, pins: [], flags: [], searches: 0, endingId: null, location }
+  const start = story.scenes.find((s) => s.id === story.start)
+  return {
+    sceneId: story.start,
+    minutes: START_MINUTES,
+    pins: [],
+    flags: [],
+    searches: 0,
+    endingId: null,
+    location: start?.location ?? null,
+    place: start?.place ?? '',
+  }
 }
 
 export function getScene(story: Story, id: string): Scene {
@@ -85,8 +107,15 @@ export function choose(state: GameState, story: Story, choice: Choice): GameStat
   const minutes = state.minutes + choice.timeCost
   if (choice.endsRun) return { ...state, minutes, flags, endingId: pickEnding(story, flags).id }
   if (!choice.next) throw new Error(`Choice "${choice.label}" needs either next or endsRun`)
-  const location = getScene(story, choice.next).location ?? state.location
-  return { ...state, minutes, flags, sceneId: choice.next, location }
+  const next = getScene(story, choice.next)
+  return {
+    ...state,
+    minutes,
+    flags,
+    sceneId: choice.next,
+    location: next.location ?? state.location,
+    place: next.place ?? state.place,
+  }
 }
 
 export function formatClock(minutes: number): string {
@@ -96,18 +125,44 @@ export function formatClock(minutes: number): string {
   return `${h12}:${String(m).padStart(2, '0')} ${h24 < 12 ? 'AM' : 'PM'}`
 }
 
-// Catches authoring mistakes in scenes.json. Returns a list of problems (empty = fine).
-export function validateStory(story: Story): string[] {
+// For each debrief beat, the outcome the player reached (null if they never reached that beat).
+export function debriefResults(story: Story, flags: string[]): { beat: DebriefBeat; outcome: DebriefOutcome | null }[] {
+  return (story.debrief ?? []).map((beat) => ({
+    beat,
+    outcome: beat.outcomes.find((o) => flags.includes(o.flag)) ?? null,
+  }))
+}
+
+// Catches authoring mistakes in scenes.json. Pass the archive's record ids to also check references.
+// Returns a list of problems (empty = fine).
+export function validateStory(story: Story, recordIds?: Set<string>): string[] {
   const problems: string[] = []
   const ids = new Set(story.scenes.map((s) => s.id))
+  const setFlags = new Set(story.scenes.flatMap((s) => s.choices.flatMap((c) => c.setsFlags ?? [])))
   if (!ids.has(story.start)) problems.push(`start scene "${story.start}" does not exist`)
   for (const scene of story.scenes) {
     for (const choice of scene.choices) {
       if (!choice.endsRun && !choice.next) problems.push(`${scene.id}: "${choice.label}" has no next or endsRun`)
       if (choice.next && !ids.has(choice.next)) problems.push(`${scene.id}: "${choice.label}" points to missing scene "${choice.next}"`)
+      for (const id of choice.requiresPinned ?? []) {
+        if (recordIds && !recordIds.has(id)) problems.push(`${scene.id}: "${choice.label}" requires missing record "${id}"`)
+      }
     }
   }
   if (!story.endings.some((e) => e.requiresFlags.length === 0)) problems.push('no catch-all ending (empty requiresFlags)')
+  for (const ending of story.endings) {
+    for (const flag of ending.requiresFlags) {
+      if (!setFlags.has(flag)) problems.push(`ending ${ending.id}: no choice sets flag "${flag}"`)
+    }
+  }
+  for (const beat of story.debrief ?? []) {
+    for (const outcome of beat.outcomes) {
+      if (!setFlags.has(outcome.flag)) problems.push(`debrief ${beat.id}: no choice sets flag "${outcome.flag}"`)
+    }
+    for (const id of beat.evidence) {
+      if (recordIds && !recordIds.has(id)) problems.push(`debrief ${beat.id}: evidence record "${id}" is missing`)
+    }
+  }
   return problems
 }
 

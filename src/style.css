@@ -317,3 +317,20 @@ button:focus-visible, input:focus-visible { outline: 3px solid #fff0af; outline-
 .record-detail .source-detail pre { margin: .6rem 0 0; background: #101c2e; color: #ffd9a8; font-size: .8rem; }
 .record-actions { display: flex; gap: .5rem; }
 .record-actions .pin-button { padding: .5rem .9rem; font-size: .85rem; }
+
+/* End-of-run debrief */
+.debrief-heading { margin: 1.5rem 0 .75rem; font-size: 1.05rem; color: #fff0d5; }
+.debrief { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-direction: column; gap: .75rem; }
+.debrief-beat { padding: .8rem 1rem; border: 2px solid #637686; background: #20344d; }
+.debrief-beat.is-safe { border-color: #69e1cc; }
+.debrief-beat.is-risky { border-color: #dc9c77; }
+.debrief-beat.is-unreached { opacity: .7; }
+.debrief-title { display: flex; align-items: center; gap: .5rem; }
+.debrief-mark { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; font-weight: 700; background: #101c2e; }
+.is-safe .debrief-mark { color: #69e1cc; }
+.is-risky .debrief-mark { color: #f7b572; }
+.debrief-claim { margin: .5rem 0 .25rem; font-style: italic; color: #cfe0ea; font-size: .9rem; }
+.debrief-outcome { margin: 0 0 .5rem; }
+.debrief-evidence { margin: 0; padding-left: 1.1rem; font-size: .85rem; }
+.debrief-evidence span { color: var(--muted); }
+.debrief-evidence .debrief-pinned { color: #69e1cc; }

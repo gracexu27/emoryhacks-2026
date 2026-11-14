@@ -1,67 +1,243 @@
 {
-  "start": "todo-start",
+  "start": "station-arrival",
   "scenes": [
     {
-      "id": "todo-start",
+      "id": "station-arrival",
+      "place": "Upper Station",
       "text": "You arrive at Upper Station. You have dinner to find, a show to catch, and the last ferry home.",
       "guide": "Lantern Night passes are going fast. I found a page where you can get your return ticket now.",
-      "location": [
-        37.001,
-        -150.004
-      ],
+      "location": [37.001, -150.004],
+      "choices": [
+        { "label": "Open Ping’s ticket page", "next": "ferry-ticket-page", "timeCost": 0 }
+      ]
+    },
+    {
+      "id": "ferry-ticket-page",
+      "place": "Upper Station",
+      "text": "A ticket page opens on your phone at lanternbay-ferry.example.",
+      "guide": "",
       "choices": [
         {
-          "label": "Open Ping’s ticket page",
-          "next": "todo-harbor",
-          "timeCost": 0
+          "label": "Enter payment details at lanternbay-ferry.example",
+          "next": "ferry-after-lookalike",
+          "timeCost": 10,
+          "setsFlags": ["fell_for_phishing"]
+        },
+        {
+          "label": "Open ferry.lanternbay.example from the pinned notice",
+          "next": "ferry-after-official",
+          "timeCost": 10,
+          "requiresPinned": ["ferry-official-tickets"],
+          "setsFlags": ["avoided_phishing"]
         }
       ]
     },
     {
-      "id": "todo-harbor",
-      "text": "A ticket page opens on your phone at lanternbay-ferry.example.",
-      "guide": "",
-      "location": [
-        37.001,
-        -150.004
-      ],
+      "id": "ferry-after-lookalike",
+      "place": "Upper Station",
+      "text": "TODO-CONTENT What happens right after paying on lanternbay-ferry.example (e.g. a confirmation number that looks normal for now).",
+      "guide": "TODO-CONTENT Ping's reaction (optional).",
+      "choices": [
+        { "label": "TODO-CONTENT Head toward the Low Market", "next": "dinner-ping", "timeCost": 15 }
+      ]
+    },
+    {
+      "id": "ferry-after-official",
+      "place": "Upper Station",
+      "text": "TODO-CONTENT What happens after buying on ferry.lanternbay.example.",
+      "guide": "TODO-CONTENT Ping's reaction (optional).",
+      "choices": [
+        { "label": "TODO-CONTENT Head toward the Low Market", "next": "dinner-ping", "timeCost": 15 }
+      ]
+    },
+
+    {
+      "id": "dinner-ping",
+      "place": "Low Market steps",
+      "text": "TODO-CONTENT Narration: getting hungry near the Low Market steps.",
+      "guide": "TODO-CONTENT Ping says the Low Market is closed tonight and recommends Calla's 7:15 PM table.",
+      "location": [37.0015, -150.0015],
       "choices": [
         {
-          "label": "Enter payment details at lanternbay-ferry.example",
-          "endsRun": true,
-          "timeCost": 10,
-          "setsFlags": [
-            "fell_for_phishing"
-          ]
+          "label": "TODO-CONTENT Book Calla’s 7:15 table",
+          "next": "dinner-at-calla",
+          "timeCost": 15,
+          "setsFlags": ["fell_for_injection"]
         },
         {
-          "label": "Open ferry.lanternbay.example from the pinned notice",
+          "label": "TODO-CONTENT Walk down to the Low Market",
+          "next": "dinner-at-market",
+          "timeCost": 15,
+          "requiresPinned": ["market-lantern-night-hours"],
+          "setsFlags": ["avoided_injection"]
+        }
+      ]
+    },
+    {
+      "id": "dinner-at-calla",
+      "place": "Calla",
+      "text": "TODO-CONTENT Dinner at Calla.",
+      "guide": "",
+      "location": [37.0005, -150.003],
+      "choices": [
+        { "label": "TODO-CONTENT Head to the Flats", "next": "wifi-ping", "timeCost": 45 }
+      ]
+    },
+    {
+      "id": "dinner-at-market",
+      "place": "Low Market",
+      "text": "TODO-CONTENT Dinner at the Low Market (the vendor from market-ama-open could appear here).",
+      "guide": "",
+      "location": [37.002, -149.999],
+      "choices": [
+        { "label": "TODO-CONTENT Head to the Flats", "next": "wifi-ping", "timeCost": 45 }
+      ]
+    },
+
+    {
+      "id": "wifi-ping",
+      "place": "The Flats",
+      "text": "TODO-CONTENT Narration: show details won't load on your phone.",
+      "guide": "TODO-CONTENT Ping suggests connecting to CityNet Free.",
+      "location": [36.9975, -149.997],
+      "choices": [
+        {
+          "label": "TODO-CONTENT Connect to CityNet Free",
+          "next": "wifi-login-screen",
+          "timeCost": 5
+        },
+        {
+          "label": "TODO-CONTENT Connect to CityNet_Public",
+          "next": "wifi-after-public",
+          "timeCost": 5,
+          "requiresPinned": ["wifi-city-locations"],
+          "setsFlags": ["avoided_evil_twin"]
+        }
+      ]
+    },
+    {
+      "id": "wifi-login-screen",
+      "place": "The Flats",
+      "text": "TODO-CONTENT CityNet Free shows a login screen asking for your city account.",
+      "guide": "",
+      "choices": [
+        {
+          "label": "TODO-CONTENT Enter your city-account login",
+          "next": "wifi-after-login",
+          "timeCost": 5,
+          "setsFlags": ["fell_for_evil_twin"]
+        },
+        {
+          "label": "TODO-CONTENT Close the login screen",
+          "next": "wifi-after-public",
+          "timeCost": 5,
+          "setsFlags": ["avoided_evil_twin"]
+        }
+      ]
+    },
+    {
+      "id": "wifi-after-login",
+      "place": "The Flats",
+      "text": "TODO-CONTENT What happens after entering the login.",
+      "guide": "",
+      "choices": [
+        { "label": "TODO-CONTENT Head to the Seawall for the show", "next": "encore-ping", "timeCost": 60 }
+      ]
+    },
+    {
+      "id": "wifi-after-public",
+      "place": "The Flats",
+      "text": "TODO-CONTENT Show details load / the player moves on without signing in.",
+      "guide": "",
+      "choices": [
+        { "label": "TODO-CONTENT Head to the Seawall for the show", "next": "encore-ping", "timeCost": 60 }
+      ]
+    },
+
+    {
+      "id": "encore-ping",
+      "place": "The Seawall",
+      "text": "TODO-CONTENT Narration: Small Hours finishes their set; the crowd calls for an encore.",
+      "guide": "TODO-CONTENT Ping says the last ferry is at 10:45 PM and there is time for the encore.",
+      "location": [36.999, -150.0],
+      "choices": [
+        {
+          "label": "TODO-CONTENT Stay for the encore",
           "endsRun": true,
-          "timeCost": 10,
-          "requiresPinned": [
-            "ferry-official-tickets"
-          ],
-          "setsFlags": [
-            "avoided_phishing"
-          ]
+          "timeCost": 30,
+          "setsFlags": ["trusted_true_claim"]
+        },
+        {
+          "label": "TODO-CONTENT Leave now for North Pier",
+          "endsRun": true,
+          "timeCost": 15,
+          "setsFlags": ["doubted_true_claim"]
         }
       ]
     }
   ],
+
   "endings": [
     {
-      "id": "todo-ending-good",
-      "title": "TODO-CONTENT Good ending",
-      "text": "TODO-CONTENT The player checked the source and it paid off.",
-      "requiresFlags": [
-        "avoided_phishing"
-      ]
+      "id": "ending-last-song-home",
+      "title": "TODO-CONTENT Heard the last song and made it home",
+      "text": "TODO-CONTENT Stayed for the encore, valid ticket, caught the 10:45.",
+      "requiresFlags": ["trusted_true_claim", "avoided_phishing"]
     },
     {
-      "id": "todo-ending-default",
-      "title": "TODO-CONTENT Default ending",
-      "text": "TODO-CONTENT Catch-all ending.",
+      "id": "ending-left-early",
+      "title": "TODO-CONTENT Made it home, missed the last song",
+      "text": "TODO-CONTENT Left before the encore.",
+      "requiresFlags": ["doubted_true_claim"]
+    },
+    {
+      "id": "ending-ticket-trouble",
+      "title": "TODO-CONTENT Heard the last song, trouble at the pier",
+      "text": "TODO-CONTENT Catch-all: stayed for the encore but the ticket from the lookalike page doesn't check out.",
       "requiresFlags": []
+    }
+  ],
+
+  "debrief": [
+    {
+      "id": "phishing",
+      "title": "Ferry tickets",
+      "claim": "Lantern Night passes are going fast. I found a page where you can get your return ticket now.",
+      "outcomes": [
+        { "flag": "avoided_phishing", "safe": true, "text": "TODO-CONTENT You bought from ferry.lanternbay.example." },
+        { "flag": "fell_for_phishing", "safe": false, "text": "TODO-CONTENT You paid on lanternbay-ferry.example." }
+      ],
+      "evidence": ["ferry-official-tickets", "ferry-domain-record", "ferry-visitor-pass"]
+    },
+    {
+      "id": "injection",
+      "title": "Dinner",
+      "claim": "TODO-CONTENT Ping's line about the Low Market being closed.",
+      "outcomes": [
+        { "flag": "avoided_injection", "safe": true, "text": "TODO-CONTENT You ate at the Low Market." },
+        { "flag": "fell_for_injection", "safe": false, "text": "TODO-CONTENT You booked Calla." }
+      ],
+      "evidence": ["market-lantern-night-hours", "market-ama-open", "calla-listing"]
+    },
+    {
+      "id": "evil-twin",
+      "title": "Wi-Fi at the Flats",
+      "claim": "TODO-CONTENT Ping's line recommending CityNet Free.",
+      "outcomes": [
+        { "flag": "avoided_evil_twin", "safe": true, "text": "TODO-CONTENT You didn't sign in to CityNet Free." },
+        { "flag": "fell_for_evil_twin", "safe": false, "text": "TODO-CONTENT You entered your city-account login on CityNet Free." }
+      ],
+      "evidence": ["wifi-city-locations", "wifi-flats-visitor-report", "wifi-citynet-free-listing"]
+    },
+    {
+      "id": "true-claim",
+      "title": "The last ferry",
+      "claim": "TODO-CONTENT Ping's line: the last ferry is 10:45 PM, there's time for the encore.",
+      "outcomes": [
+        { "flag": "trusted_true_claim", "safe": true, "text": "TODO-CONTENT You stayed for the encore. Ping was right this time." },
+        { "flag": "doubted_true_claim", "safe": false, "text": "TODO-CONTENT You left early because of an old post." }
+      ],
+      "evidence": ["ferry-lantern-night-timetable", "ferry-festival-service", "ferry-old-visitor-post"]
     }
   ]
 }
