@@ -5,6 +5,7 @@ import {
   searchIsConfigured,
   SOURCE_GROUPS,
   SOURCE_TYPES,
+  type ArchiveHit,
   type ArchiveRecord,
   type GroupedResults,
   type LatLng,
@@ -13,6 +14,7 @@ import {
   type SourceType,
 } from '../lib/typesense'
 import { MapView } from './MapView'
+import { RecordDetail } from './RecordDetail'
 import { ResultCard } from './ResultCard'
 
 const COLUMN_TITLES: Record<ResultGroup, string> = {
@@ -35,6 +37,7 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin }: Props) 
   const [lastQuery, setLastQuery] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [selected, setSelected] = useState<ArchiveHit | null>(null) // record open in the detail view
 
   async function runSearch(q: string, nextFilters: SearchFilters) {
     if (!q) return
@@ -42,6 +45,7 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin }: Props) 
     setError('')
     try {
       setResults(await multiSearchArchive(q, nextFilters, origin))
+      setSelected(null)
       setLastQuery(q)
     } catch (cause) {
       setResults(null)
@@ -135,9 +139,18 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin }: Props) 
       {!configured && <p role="status" className="notice">Run the import script, then restart the dev server.</p>}
       {error && <p role="alert" className="notice notice-error">Search failed: {error}</p>}
 
-      {showMap && <MapView hits={allHits} origin={origin} nearMe={filters.nearMe} />}
+      {selected && (
+        <RecordDetail
+          record={selected}
+          pinned={isPinned(selected.id)}
+          onTogglePin={onTogglePin}
+          onBack={() => setSelected(null)}
+        />
+      )}
 
-      {results && (
+      {!selected && showMap && <MapView hits={allHits} origin={origin} nearMe={filters.nearMe} />}
+
+      {!selected && results && (
         <div className="columns">
           {SOURCE_GROUPS.map((group) => (
             <div key={group} className="column">
@@ -148,7 +161,13 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin }: Props) 
                 <p className="empty">Nothing here for “{lastQuery}”.</p>
               ) : (
                 results[group].map((record) => (
-                  <ResultCard key={record.id} record={record} pinned={isPinned(record.id)} onTogglePin={onTogglePin} />
+                  <ResultCard
+                    key={record.id}
+                    record={record}
+                    pinned={isPinned(record.id)}
+                    onTogglePin={onTogglePin}
+                    onOpen={setSelected}
+                  />
                 ))
               )}
             </div>

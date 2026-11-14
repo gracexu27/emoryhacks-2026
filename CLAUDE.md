@@ -40,7 +40,7 @@ The player clicks objects in a pixel-art scene, reads their details in legible p
 - Local Typesense runs through Docker. `scripts/import.ts` recreates the `archive` collection and imports `content/records.json` on each run.
 - The app now has a grouped search UI, filters, date and source badges, a schematic map, a clock, notebook, scene engine, and a basic ending. These are a walking skeleton, not a complete playthrough.
 - The scene file still contains `TODO-CONTENT` narration and two short placeholder scenes. It points to the approved ferry notice but ends after a skeleton choice.
-- The opening ferry scene now has an original full-screen pixel map, title screen, on-map controls, and archive/notebook/pause overlays. There is still no full record detail panel. Calla has a basic “View page source” disclosure on its result card.
+- The opening ferry scene now has an original full-screen pixel map, title screen, on-map controls, and archive/notebook/pause overlays. Clicking a result title opens a record detail view in the archive window (all fields, pin button); Calla's “View page source” lives only there, never on search cards.
 - The intended deployment is a static build on Vultr, with the search service and a custom domain configured separately.
 
 ## Project structure

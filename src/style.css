@@ -302,3 +302,18 @@ button:focus-visible, input:focus-visible { outline: 3px solid #fff0af; outline-
 @media (max-height: 580px) and (min-width: 751px) {
   .dialog-wrap { max-height: 55dvh; }
 }
+
+/* Record detail view (inside the archive window) */
+.result-title { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: #637686; text-underline-offset: 3px; }
+.result-title:hover { text-decoration-color: currentColor; }
+.record-detail { display: flex; flex-direction: column; gap: .75rem; padding: 1rem; border: 2px solid #637686; background: #20344d; }
+.record-detail.is-sponsored { border-color: #dc9c77; }
+.record-back { align-self: flex-start; font-size: .85rem; }
+.record-detail h2 { margin: 0; font-size: 1.25rem; color: #fff0d5; }
+.record-body { margin: 0; font-size: 1rem; line-height: 1.6; }
+.record-facts { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; margin: 0; font-size: .85rem; }
+.record-facts dt { color: var(--muted); }
+.record-facts dd { margin: 0; overflow-wrap: anywhere; }
+.record-detail .source-detail pre { margin: .6rem 0 0; background: #101c2e; color: #ffd9a8; font-size: .8rem; }
+.record-actions { display: flex; gap: .5rem; }
+.record-actions .pin-button { padding: .5rem .9rem; font-size: .85rem; }
