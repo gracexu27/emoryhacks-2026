@@ -40,7 +40,7 @@ The player clicks objects in a pixel-art scene, reads their details in legible p
 - Local Typesense runs through Docker. `scripts/import.ts` recreates the `archive` collection and imports `content/records.json` on each run.
 - The app now has a grouped search UI, filters, date and source badges, a schematic map, a clock, notebook, scene engine, and a basic ending. These are a walking skeleton, not a complete playthrough.
 - The scene file still contains `TODO-CONTENT` narration and two short placeholder scenes. It points to the approved ferry notice but ends after a skeleton choice.
-- There is no clickable pixel-art scene or full record detail panel yet. Calla has a basic “View page source” disclosure on its result card.
+- The opening ferry scene now has an original full-screen pixel map, title screen, on-map controls, and archive/notebook/pause overlays. There is still no full record detail panel. Calla has a basic “View page source” disclosure on its result card.
 - The intended deployment is a static build on Vultr, with the search service and a custom domain configured separately.
 
 ## Project structure
@@ -56,6 +56,7 @@ src/lib/typesense.ts      # multi-search, filters, and geo sorting
 src/game/engine.ts        # pure clock, pins, flags, scene transitions
 src/components/           # search, results, map, notebook, scene, clock, recap
 src/App.tsx               # wires the walking skeleton
+public/art/lantern-bay-map.png # opening map artwork
 .env.example
 ```
 
@@ -96,7 +97,7 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 2. Add readable record details and Calla's “View page source” action. The hidden text must not be displayed on an ordinary search card.
 3. Replace the placeholder ferry scene with the approved Ping recommendation and neutral choices. Keep the clock, notebook, and ending working.
 4. Add the dinner, Wi-Fi, and true ferry-time beats; then the full recap.
-5. Add synonyms, pixel art, geo refinements, or voice only after the first route is playable. The ferry-time clue must remain available by text search.
+5. Refine the pixel art and add synonyms, geo refinements, or voice after the first route is playable. The ferry-time clue must remain available by text search.
 
 ## Security rules
 
@@ -110,7 +111,7 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 2. **Search UI and walking skeleton:** grouped search, basic source disclosure, clock, notebook, map, and placeholder scenes exist; the story route is incomplete.
 3. **First playable ferry beat (next):** Ping's link, archive evidence, neutral choice, clock, pinning, and a consequence.
 4. **Full route:** dinner, Wi-Fi, true ferry-time claim, endings, and recap.
-5. **Polish and deploy:** pixel art, sound, responsive layout, error states, Vultr build, custom domain, demo video.
+5. **Polish and deploy:** the first full-screen art pass and responsive layout exist; sound, error states, Vultr build, custom domain, and demo video remain.
 
 ## How I want you to work
 

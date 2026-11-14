@@ -1,4 +1,4 @@
-import { useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import storyData from '../content/scenes.json'
 import {
   availableChoices,
@@ -10,10 +10,13 @@ import {
   type Story,
 } from './game/engine'
 import { Clock } from './components/Clock'
+import { PixelTownScene } from './components/PixelTownScene'
 import { EndingRecap } from './components/EndingRecap'
 import { Notebook } from './components/Notebook'
 import { SceneView } from './components/SceneView'
 import { SearchPanel } from './components/SearchPanel'
+
+type Panel = 'archive' | 'notebook' | 'pause' | 'pier' | null
 
 const story = storyData as Story
 const reducer = gameReducer(story)
@@ -25,43 +28,111 @@ if (import.meta.env.DEV) {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, story, initialState)
+  const [started, setStarted] = useState(false)
+  const [panel, setPanel] = useState<Panel>(null)
+  const [dialogOpen, setDialogOpen] = useState(true)
+  const [showLabels, setShowLabels] = useState(true)
+  const scene = getScene(story, state.sceneId)
+  const ending = state.endingId ? story.endings.find((item) => item.id === state.endingId) : null
 
-  if (state.endingId) {
-    const ending = story.endings.find((e) => e.id === state.endingId)!
-    return (
-      <main className="shell">
-        <EndingRecap ending={ending} state={state} onRestart={() => dispatch({ type: 'restart' })} />
-      </main>
-    )
+  useEffect(() => {
+    if (!panel) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPanel(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [panel])
+
+  useEffect(() => {
+    if (panel === 'archive') document.getElementById('archive-query')?.focus()
+  }, [panel])
+
+  function restart() {
+    dispatch({ type: 'restart' })
+    setPanel(null)
+    setDialogOpen(true)
+    setStarted(false)
   }
 
-  const scene = getScene(story, state.sceneId)
-
   return (
-    <main className="shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Lantern Bay</p>
-          <h1>A Guide to Getting Lost</h1>
-        </div>
-        <Clock minutes={state.minutes} />
-      </header>
-
-      <SceneView
-        scene={scene}
-        choices={availableChoices(state, scene)}
-        onChoose={(choice) => dispatch({ type: 'choose', choice })}
+    <main className="game-root">
+      <PixelTownScene
+        interactive={started && !panel && !ending}
+        showLabels={showLabels}
+        onArchive={() => setPanel('archive')}
+        onPhone={() => setDialogOpen(true)}
+        onPier={() => setPanel('pier')}
       />
 
-      <div className="workspace">
-        <SearchPanel
-          origin={state.location}
-          onSearch={() => dispatch({ type: 'search' })}
-          isPinned={(id) => isPinned(state, id)}
-          onTogglePin={(record) => dispatch({ type: 'togglePin', record })}
-        />
-        <Notebook pins={state.pins} onUnpin={(record) => dispatch({ type: 'togglePin', record })} />
-      </div>
+      {started && (
+        <>
+          <div className="map-location" aria-hidden="true"><span className="location-mark">✦</span> Lantern Bay <span className="location-divider">/</span> Upper Station</div>
+          <nav className="game-toolbar" aria-label="Game controls">
+            <div className="clock-chip"><span className="weather-glyph" aria-hidden="true">☂</span><Clock minutes={state.minutes} /></div>
+            <button type="button" className="toolbar-button" onClick={() => setPanel('archive')} aria-label="Open archive search"><span aria-hidden="true">⌕</span><span>Archive</span></button>
+            <button type="button" className="toolbar-button" onClick={() => setPanel('notebook')} aria-label={`Open notebook, ${state.pins.length} pinned records`}><span aria-hidden="true">▤</span><span>Notes{state.pins.length > 0 ? ` ${state.pins.length}` : ''}</span></button>
+            <button type="button" className="toolbar-button pause-button" onClick={() => setPanel('pause')} aria-label="Pause and settings"><span aria-hidden="true">Ⅱ</span><span>Pause</span></button>
+          </nav>
+        </>
+      )}
+
+      {started && !ending && !panel && (
+        dialogOpen ? (
+          <div className="dialog-wrap">
+            <div className="dialog-topline"><span className="dialog-avatar" aria-hidden="true">P</span><span>Ping</span><button type="button" onClick={() => setDialogOpen(false)} aria-label="Minimize dialogue">−</button></div>
+            <SceneView
+              scene={scene}
+              choices={availableChoices(state, scene)}
+              onChoose={(choice) => { dispatch({ type: 'choose', choice }); setDialogOpen(true) }}
+            />
+          </div>
+        ) : (
+          <button type="button" className="phone-tab" onClick={() => setDialogOpen(true)}>Ping <span aria-hidden="true">●</span></button>
+        )
+      )}
+
+      {!started && (
+        <section className="title-screen" aria-labelledby="game-title">
+          <div className="title-card">
+            <p className="title-kicker">LANTERN BAY · ONE NIGHT ONLY</p>
+            <h1 id="game-title">A Guide to<br /><em>Getting Lost</em></h1>
+            <p className="title-subtitle">Ping means well. Check anyway.</p>
+            <button type="button" className="start-button" onClick={() => setStarted(true)}>Start exploring <span aria-hidden="true">→</span></button>
+          </div>
+          <p className="title-footer">A coastal mystery about trust, timing, and finding your own way.</p>
+        </section>
+      )}
+
+      {started && ending && (
+        <div className="overlay-backdrop ending-backdrop">
+          <div className="game-window ending-window"><EndingRecap ending={ending} state={state} onRestart={restart} /></div>
+        </div>
+      )}
+
+      {started && <div className="overlay-backdrop" hidden={panel === null} onMouseDown={(event) => { if (event.target === event.currentTarget) setPanel(null) }}>
+        <section className={`game-window ${panel === 'archive' ? 'archive-window' : ''}`} role="dialog" aria-modal="true" aria-label={panel === 'archive' ? 'City archive' : panel === 'notebook' ? 'Notebook' : panel === 'pause' ? 'Pause and settings' : 'North Pier'}>
+          <div className="window-header"><span>{panel === 'archive' ? 'City archive' : panel === 'notebook' ? 'Notebook' : panel === 'pause' ? 'Paused' : 'North Pier'}</span><button type="button" onClick={() => setPanel(null)} aria-label="Close panel">×</button></div>
+          <div className="window-content">
+            <div hidden={panel !== 'archive'}>
+              <SearchPanel
+                origin={state.location}
+                onSearch={() => dispatch({ type: 'search' })}
+                isPinned={(id) => isPinned(state, id)}
+                onTogglePin={(record) => dispatch({ type: 'togglePin', record })}
+              />
+            </div>
+            {panel === 'notebook' && <Notebook pins={state.pins} onUnpin={(record) => dispatch({ type: 'togglePin', record })} />}
+            {panel === 'pause' && <div className="settings-panel">
+              <p>Lantern Night is waiting.</p>
+              <label className="settings-toggle"><input type="checkbox" checked={showLabels} onChange={(event) => setShowLabels(event.target.checked)} /> Show map labels</label>
+              <button type="button" className="primary-button" onClick={() => setPanel(null)}>Resume</button>
+              <button type="button" className="secondary-button" onClick={restart}>Return to title</button>
+            </div>}
+            {panel === 'pier' && <div className="pier-panel"><span aria-hidden="true">⚓</span><p>North Pier · Ticket window</p><button type="button" className="primary-button" onClick={() => setPanel('archive')}>Open archive</button></div>}
+          </div>
+        </section>
+      </div>}
     </main>
   )
 }

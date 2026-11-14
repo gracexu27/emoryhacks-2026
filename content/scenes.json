@@ -3,7 +3,7 @@
   "scenes": [
     {
       "id": "todo-start",
-      "text": "TODO-CONTENT Opening narration. The player arrives in town.",
+      "text": "You arrive at Upper Station. You have dinner to find, a show to catch, and the last ferry home.",
       "guide": "Lantern Night passes are going fast. I found a page where you can get your return ticket now.",
       "location": [
         37.001,
@@ -13,17 +13,17 @@
         {
           "label": "Open Ping’s ticket page",
           "next": "todo-harbor",
-          "timeCost": 15
+          "timeCost": 0
         }
       ]
     },
     {
       "id": "todo-harbor",
-      "text": "TODO-CONTENT Ticket page at lanternbay-ferry.example.",
+      "text": "A ticket page opens on your phone at lanternbay-ferry.example.",
       "guide": "",
       "location": [
-        36.999,
-        -150.001
+        37.001,
+        -150.004
       ],
       "choices": [
         {

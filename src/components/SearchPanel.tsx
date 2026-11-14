@@ -83,7 +83,7 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin }: Props) 
   const showMap = Boolean(origin) && allHits.some((hit) => hit.location)
 
   return (
-    <section className="search-panel">
+    <section id="town-archive" className="search-panel">
       <form onSubmit={handleSubmit} className="search-form">
         <label htmlFor="archive-query">Search the city archive</label>
         <div className="search-row">
