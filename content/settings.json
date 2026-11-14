@@ -1,12 +1,12 @@
 {
   "gameToday": "2026-11-14T00:00:00Z",
   "recentDays": 30,
-  "nearMeRadiusKm": 0.5,
+  "nearMeRadiusKm": 0.25,
   "map": {
-    "_note": "TODO-CONTENT placeholder ~1 km box in open ocean. Town coordinates in records/scenes must fall inside it.",
-    "south": 36.995,
-    "north": 37.005,
-    "west": -150.006,
-    "east": -149.994
+    "_note": "Bounds match the 16:9 town art (public/art/lantern-bay-map.jpg): north/west = top-left corner, south/east = bottom-right. Coordinates are fictional.",
+    "south": 36.9975,
+    "north": 37.0025,
+    "west": -150.00556,
+    "east": -149.99444
   }
 }

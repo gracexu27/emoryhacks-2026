@@ -1,18 +1,21 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useReducer, useState, type CSSProperties } from 'react'
 import storyData from '../content/scenes.json'
 import recordsData from '../content/records.json'
-import type { ArchiveRecord } from './lib/typesense'
+import { NEAR_ME_RADIUS_KM, type ArchiveHit, type ArchiveRecord } from './lib/typesense'
+import { geoToImage } from './lib/townMap'
 import {
   availableChoices,
   gameReducer,
   getScene,
   initialState,
   isPinned,
+  parseClock,
+  START_MINUTES,
   validateStory,
   type Story,
 } from './game/engine'
 import { Clock } from './components/Clock'
-import { PixelTownScene } from './components/PixelTownScene'
+import { PixelTownScene, type MapMarker } from './components/PixelTownScene'
 import { EndingRecap } from './components/EndingRecap'
 import { Notebook } from './components/Notebook'
 import { SceneView } from './components/SceneView'
@@ -36,7 +39,23 @@ function App() {
   const [panel, setPanel] = useState<Panel>(null)
   const [dialogOpen, setDialogOpen] = useState(true)
   const [showLabels, setShowLabels] = useState(true)
+  const [selectedRecord, setSelectedRecord] = useState<ArchiveHit | null>(null) // open in the archive detail view
+  const [mapView, setMapView] = useState<{ hits: ArchiveHit[]; nearMe: boolean } | null>(null) // results shown on the town
   const scene = getScene(story, state.sceneId)
+
+  // Night deepens from the start of the evening to the last ferry (0 → 1); drives the sky tint.
+  const deadline = story.deadline ? parseClock(story.deadline.time) : START_MINUTES + 255
+  const minutesLeft = deadline - state.minutes
+  const night = Math.min(1, Math.max(0, (state.minutes - START_MINUTES) / (deadline - START_MINUTES)))
+
+  // Archive results with a location become pins on the town art; clicking one reopens that record.
+  const markers: MapMarker[] = (mapView?.hits ?? []).flatMap((hit) => hit.location ? [{
+    id: hit.id,
+    point: geoToImage(hit.location),
+    label: hit.title,
+    group: hit.source_group,
+    onClick: () => { setSelectedRecord(hit); setPanel('archive') },
+  }] : [])
   const ending = state.endingId ? story.endings.find((item) => item.id === state.endingId) : null
 
   useEffect(() => {
@@ -57,23 +76,28 @@ function App() {
     setPanel(null)
     setDialogOpen(true)
     setStarted(false)
+    setMapView(null)
+    setSelectedRecord(null)
   }
 
   return (
-    <main className="game-root">
+    <main className="game-root" style={{ '--night': started ? night : 0 } as CSSProperties}>
       <PixelTownScene
         interactive={started && !panel && !ending}
         showLabels={showLabels}
         onArchive={() => setPanel('archive')}
         onPhone={() => setDialogOpen(true)}
         onPier={() => setPanel('pier')}
+        markers={started && !panel && !ending ? markers : []}
+        you={state.location ? geoToImage(state.location) : null}
+        radiusMeters={mapView?.nearMe ? NEAR_ME_RADIUS_KM * 1000 : null}
       />
 
       {started && (
         <>
           <div className="map-location" aria-hidden="true"><span className="location-mark">✦</span> Lantern Bay <span className="location-divider">/</span> {state.place}</div>
           <nav className="game-toolbar" aria-label="Game controls">
-            <div className="clock-chip"><span className="weather-glyph" aria-hidden="true">☂</span><Clock minutes={state.minutes} /></div>
+            <div className={`clock-chip${minutesLeft <= 15 ? ' is-urgent' : minutesLeft <= 45 ? ' is-late' : ''}`} title={`${Math.max(0, minutesLeft)} minutes until the last ferry`}><span className="weather-glyph" aria-hidden="true">☂</span><Clock minutes={state.minutes} /></div>
             <button type="button" className="toolbar-button" onClick={() => setPanel('archive')} aria-label="Open archive search"><span aria-hidden="true">⌕</span><span>Archive</span></button>
             <button type="button" className="toolbar-button" onClick={() => setPanel('notebook')} aria-label={`Open notebook, ${state.pins.length} pinned records`}><span aria-hidden="true">▤</span><span>Notes{state.pins.length > 0 ? ` ${state.pins.length}` : ''}</span></button>
             <button type="button" className="toolbar-button pause-button" onClick={() => setPanel('pause')} aria-label="Pause and settings"><span aria-hidden="true">Ⅱ</span><span>Pause</span></button>
@@ -81,10 +105,18 @@ function App() {
         </>
       )}
 
+      {started && !ending && !panel && mapView && (
+        <div className="map-banner" role="status">
+          <span>{markers.length} archive {markers.length === 1 ? 'result' : 'results'} on the map{mapView.nearMe ? ` · within ${NEAR_ME_RADIUS_KM * 1000} m` : ''}</span>
+          <button type="button" onClick={() => setPanel('archive')}>Back to archive</button>
+          <button type="button" onClick={() => setMapView(null)} aria-label="Clear map pins">Clear</button>
+        </div>
+      )}
+
       {started && !ending && !panel && (
         dialogOpen ? (
           <div className="dialog-wrap">
-            <div className="dialog-topline"><span className="dialog-avatar" aria-hidden="true">P</span><span>Ping</span><button type="button" onClick={() => setDialogOpen(false)} aria-label="Minimize dialogue">−</button></div>
+            <div className="dialog-topline"><span className="location-mark" aria-hidden="true">✦</span><span>{state.place}</span><button type="button" onClick={() => setDialogOpen(false)} aria-label="Minimize dialogue">−</button></div>
             <SceneView
               scene={scene}
               choices={availableChoices(state, scene)}
@@ -124,6 +156,9 @@ function App() {
                 onSearch={() => dispatch({ type: 'search' })}
                 isPinned={(id) => isPinned(state, id)}
                 onTogglePin={(record) => dispatch({ type: 'togglePin', record })}
+                selected={selectedRecord}
+                onSelect={setSelectedRecord}
+                onShowOnMap={(hits, nearMe) => { setMapView({ hits, nearMe }); setPanel(null); setDialogOpen(false) }}
               />
             </div>
             {panel === 'notebook' && <Notebook pins={state.pins} onUnpin={(record) => dispatch({ type: 'togglePin', record })} />}

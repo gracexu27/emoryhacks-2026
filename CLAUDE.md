@@ -38,7 +38,7 @@ The player clicks objects in a pixel-art scene, reads their details in legible p
 
 - Vite + React + TypeScript and plain CSS. Do not add a UI framework without approval.
 - Local Typesense runs through Docker. `scripts/import.ts` recreates the `archive` collection and imports `content/records.json` on each run.
-- The app now has a grouped search UI, filters, date and source badges, a schematic map, a clock, notebook, scene engine, and a basic ending. These are a walking skeleton, not a complete playthrough.
+- The app now has a grouped search UI, filters, date and source badges, archive results pinned on the town art, a clock, notebook, scene engine, and a basic ending. These are a walking skeleton, not a complete playthrough.
 - `content/scenes.json` has the full route (ferry → dinner → Wi-Fi → encore), four endings including missed-ferry, and the debrief; most narration is still `TODO-CONTENT`.
 - The opening ferry scene now has an original full-screen pixel map, title screen, on-map controls, and archive/notebook/pause overlays. Clicking a result title opens a record detail view in the archive window (all fields, pin button); Calla's “View page source” lives only there, never on search cards.
 - **Deployed on Vultr** at `http://64.177.55.92` (Atlanta, Ubuntu 24.04, 1 vCPU / 2 GB). Custom domain + HTTPS still to do.
@@ -55,7 +55,7 @@ Existing:
 ```text
 content/records.json      # 13 authored archive records
 content/scenes.json       # full route skeleton (ferry → dinner → Wi-Fi → encore), endings, debrief; TODO-CONTENT text
-content/settings.json     # fictional day, near-me radius, schematic map bounds
+content/settings.json     # fictional day, near-me radius (250 m), map bounds = corners of the town art
 content/synonyms.json     # Typesense synonym set (ferry/boat, dinner/food/where to eat, wifi/internet, …)
 scripts/import.ts         # recreates archive, upserts the synonym set, imports records
 src/lib/typesense.ts      # multi-search, filters, and geo sorting
@@ -79,7 +79,7 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 - `hidden_text` is stored on `calla-listing` for the “View page source” action. It must not appear on ordinary result cards.
 - `network_name` is stored on the two Wi-Fi records. The fake network is `CityNet Free`; the city-operated name is `CityNet_Public`.
 - Fictional ferry addresses are in record excerpts. The import schema has optional `domain` and `domain_registered` fields, but the authored data does not use them yet.
-- Several authored records have schematic `location` coordinates so the map and near-me filter can work. `content/settings.json` defines the map bounds; these coordinates are not real-world geography.
+- Several authored records have `location` coordinates placed on spots in the town art (station, noodle stall, bao cart, Calla's umbrellas, ticket booth, ferry gangway, lower docks = the Flats). `content/settings.json` map bounds are the art's corners, so `src/lib/townMap.ts` converts lat/lng to a position on the picture. "Show on town map" in the archive puts located results as pins on the scene (with the player's "You" marker and the near-me radius); clicking a pin reopens that record. To place something, pick a pixel (x, y) in the 1672×941 art: lat = north − y/941·(north−south), lng = west + x/1672·(east−west).
 - The importer can enable CLIP and Whisper models with `ENABLE_EXPERIMENTAL_MEDIA_SEARCH=1`; they are off by default. The current story has no image records, QR clue, or voice UI. Keep those features out of the critical path.
 - Show source and date on result cards; they are essential to the old-post and lookalike-site clues. Archive timestamps use UTC as the fictional night’s wall clock, matching the current date display. Show sponsored status as “Featured,” not as a trust signal.
 
@@ -92,6 +92,7 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 - In dev, the browser console warns about broken scene links, unknown record ids, and flags no choice sets.
 - The clock starts at 6:30 PM; the last ferry leaves at 10:45 PM. Each submitted archive search costs five in-game minutes (failed searches are free); scene choices can have their own time costs.
 - `deadline: { "time": "22:45", "flag": "missed_last_ferry" }` in `scenes.json`: after any search or choice that pushes the clock past it, the run ends with that flag set, so `ending-missed-ferry` (listed first) wins. On the best route the player can afford about 15 searches.
+- Time is visible: `App.tsx` sets `--night` (0 at 6:30 PM → 1 at the deadline) on `.game-root`; CSS dims, cools and tints the town art with it. The clock chip turns amber 45 min before the deadline (`is-late`) and pulses red in the last 15 (`is-urgent`).
 - A player can discover and pin the ferry timetable early, then use it at the show without another search.
 - Clicking a scene object can open a phone panel or record. Searching the archive finds related evidence. Do not reveal the verdict merely by clicking a hotspot.
 - Pins may unlock actions, but choices must name what the player actually sees or does, not disclose that a source is correct.

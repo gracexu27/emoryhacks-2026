@@ -103,21 +103,10 @@ p { line-height: 1.6; }
 .badge-distance { color: var(--accent); text-transform: none; }
 .toggle.is-disabled { opacity: .5; cursor: default; }
 .hint { color: var(--muted); font-size: .8rem; }
-.map { margin: 0 0 1rem; }
-.map svg { display: block; width: 100%; max-height: 18rem; border: 1px solid var(--line); border-radius: 8px; }
-.map-bg { fill: #0c1620; }
-.map-radius { fill: rgba(139, 199, 200, .08); stroke: var(--accent); stroke-dasharray: 4 4; }
-.map-pin circle { stroke: #0c1620; stroke-width: 2; }
-.map-pin text, .map-you text { font-size: 10px; fill: #e9eef4; }
-.map-pin-official circle { fill: #9fd3a8; }
-.map-pin-people circle { fill: #e3b3d6; }
-.map-pin-places circle { fill: #d8cf9a; }
-.map-you circle { fill: #ffffff; stroke: var(--accent); stroke-width: 3; }
 
 .source-detail { margin: .6rem 0; }
 .source-detail summary { cursor: pointer; color: var(--accent); font-size: .85rem; }
 .source-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: .6rem; border: 1px solid var(--line); border-radius: 4px; font-size: .75rem; }
-.map-pin-web circle { fill: #a9c3f0; }
 
 /* Full-screen Lantern Bay game layout. The 480 × 270 canvas is enlarged only
    with nearest-neighbor scaling, so each painted unit remains a square pixel. */
@@ -172,9 +161,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid #fff0af; outline-
 }
 .map-hotspot:hover { background: #356a72; border-color: #ffe4aa; }
 .map-hotspot-symbol { color: #72ecce; font-size: 1rem; line-height: 1; }
-.hotspot-archive { left: 20%; top: 58%; }
-.hotspot-phone { left: 50%; top: 55%; }
-.hotspot-pier { left: 72%; top: 30%; }
 
 .map-location, .game-toolbar { position: absolute; z-index: 4; top: 16px; }
 .map-location {
@@ -227,14 +213,28 @@ button:focus-visible, input:focus-visible { outline: 3px solid #fff0af; outline-
 .dialog-topline { display: flex; align-items: center; gap: .55rem; padding: .5rem .7rem; background: #25435a; color: #ffe9c5; font: 700 .86rem monospace; }
 .dialog-avatar { display: grid; place-items: center; width: 25px; height: 25px; border: 2px solid #ffc68c; background: #7d5a83; color: #fff0c9; }
 .dialog-topline button { margin-left: auto; border: 0; background: transparent; color: #ffe7c5; font-size: 1.2rem; cursor: pointer; }
-.dialog-wrap .scene { margin: 0; padding: .75rem .9rem .9rem; border: 0; box-shadow: none; background: none; }
-.dialog-wrap .scene-text { margin: 0 0 .45rem; color: #d7dfe0; font-size: .82rem; line-height: 1.4; }
-.dialog-wrap .guide-line { margin: 0 0 .7rem; padding: .35rem 0; border: 0; background: none; color: #fff1d7; font-size: .95rem; line-height: 1.45; }
-.dialog-wrap .guide-name { display: none; }
-.dialog-wrap .choices { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; }
-.dialog-wrap .choice { justify-content: space-between; border: 2px solid #89cbbb; border-radius: 0; background: #214457; color: #fff3d8; font-size: .78rem; line-height: 1.35; }
-.dialog-wrap .choice:hover { background: #35706b; }
-.dialog-wrap .choice-cost { color: #e9bf88; }
+.dialog-wrap { width: min(480px, calc(100vw - 24px)); }
+.dialog-wrap .scene { margin: 0; padding: .85rem .95rem 1rem; border: 0; box-shadow: none; background: none; }
+/* Narration: the world speaking. Quiet, italic, no speaker. */
+.dialog-wrap .scene-text { margin: 0 0 .8rem; color: #c9d6dc; font-size: .9rem; font-style: italic; line-height: 1.5; }
+/* Ping: a character with a face and a speech bubble. */
+.ping-says { display: flex; align-items: flex-start; gap: .6rem; margin: 0 0 .9rem; }
+.ping-face { flex: none; display: flex; align-items: center; justify-content: center; gap: 6px; width: 38px; height: 38px; margin-top: 2px; border: 3px solid #bff2ea; border-radius: 50%; background: #69e1cc; box-shadow: 0 0 14px #69e1cc88; }
+.ping-face span { width: 6px; height: 9px; border-radius: 3px; background: #0b2a2e; animation: ping-blink 4s infinite; }
+.dialog-wrap .guide-line { position: relative; margin: 0; padding: .55rem .75rem; border: 2px solid #69e1cc; background: #e9fbf8; color: #0b2a2e; font-size: .98rem; line-height: 1.45; }
+.dialog-wrap .guide-line::before { content: ''; position: absolute; left: -9px; top: 12px; border: 7px solid transparent; border-right-color: #69e1cc; border-left: 0; }
+.dialog-wrap .guide-name { display: block; margin: 0 0 .15rem; color: #11706a; font: 700 .72rem monospace; letter-spacing: .08em; text-transform: uppercase; }
+/* Choices: chunky game buttons with their time cost. */
+.dialog-wrap .choices { display: flex; flex-direction: column; align-items: stretch; gap: .45rem; }
+.dialog-wrap .choice { display: flex; align-items: center; gap: .6rem; min-height: 46px; padding: .55rem .7rem; border: 2px solid #f1be85; border-radius: 0; background: #2a2440; box-shadow: 3px 3px 0 #091426; color: #fff3d8; font-size: .9rem; font-weight: 600; line-height: 1.3; text-align: left; cursor: pointer; transition: transform .08s, background .12s; }
+.dialog-wrap .choice:hover, .dialog-wrap .choice:focus-visible { background: #4a3a5c; transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #091426; }
+.dialog-wrap .choice:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #091426; }
+.choice-arrow { color: #f1be85; font-size: .7rem; }
+.choice-label { flex: 1; }
+.dialog-wrap .choice-cost { flex: none; padding: .1rem .4rem; border: 1px solid #e9bf8899; color: #e9bf88; font: 700 .72rem monospace; }
+.dialog-topline .location-mark { color: #f1be85; }
+@keyframes ping-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@media (prefers-reduced-motion: reduce) { .ping-face span { animation: none; } .dialog-wrap .choice { transition: none; } }
 .phone-tab { position: absolute; z-index: 4; left: 18px; bottom: 18px; padding: .65rem .85rem; border: 2px solid #f1be85; background: #1a3048; box-shadow: 4px 4px 0 #081426; color: #fff1d7; cursor: pointer; font: 700 .8rem monospace; }
 .phone-tab span { color: #7ceacc; }
 
@@ -334,3 +334,81 @@ button:focus-visible, input:focus-visible { outline: 3px solid #fff0af; outline-
 .debrief-evidence { margin: 0; padding-left: 1.1rem; font-size: .85rem; }
 .debrief-evidence span { color: var(--muted); }
 .debrief-evidence .debrief-pinned { color: #69e1cc; }
+
+/* Archive results shown on the town art */
+.map-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; margin: 0 0 1rem; padding: .6rem .8rem; border: 2px dashed #637686; background: #1a2c44; font-size: .9rem; }
+.town-pin { position: absolute; z-index: 3; display: flex; align-items: center; gap: .4rem; padding: 0; transform: translate(-9px, -50%); border: 0; background: none; cursor: pointer; }
+.town-pin-dot { width: 18px; height: 18px; border: 3px solid #0b1626; border-radius: 50%; background: #69e1cc; box-shadow: 0 0 0 3px #69e1cc66, 0 0 18px 4px #69e1cc88; animation: town-pin-pulse 1.6s ease-in-out infinite; }
+.town-pin-people .town-pin-dot { background: #f2a6d4; box-shadow: 0 0 0 3px #f2a6d466, 0 0 18px 4px #f2a6d488; }
+.town-pin-places .town-pin-dot, .town-pin-web .town-pin-dot { background: #f7b572; box-shadow: 0 0 0 3px #f7b57266, 0 0 18px 4px #f7b57288; }
+.town-pin-label { max-width: 14rem; padding: .25rem .45rem; border: 2px solid #eed3a3; background: #172743f0; box-shadow: 3px 3px 0 #09182b; color: #fff1cf; font: 700 .72rem/1.2 monospace; text-align: left; }
+.town-pin:hover .town-pin-label, .town-pin:focus-visible .town-pin-label { background: #356a72; }
+.town-you { position: absolute; z-index: 4; width: 16px; height: 16px; transform: translate(-50%, -50%); border: 3px solid #fff; border-radius: 50%; background: #ff5c8a; box-shadow: 0 0 0 4px #ff5c8a55; pointer-events: none; }
+.town-you span { position: absolute; left: 50%; bottom: 140%; transform: translateX(-50%); padding: .1rem .35rem; background: #ff5c8a; color: #fff; font: 700 .7rem monospace; white-space: nowrap; }
+.town-radius { position: absolute; z-index: 2; transform: translate(-50%, -50%); border: 2px dashed #fff1cf; border-radius: 50%; background: #69e1cc1f; pointer-events: none; }
+.map-banner { position: absolute; z-index: 5; top: 74px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: .6rem; padding: .45rem .6rem .45rem .9rem; border: 2px solid #eed3a3; background: #172743f0; box-shadow: 4px 4px 0 #081426; color: #fff1cf; font: 700 .78rem monospace; white-space: nowrap; }
+.map-banner button { padding: .3rem .6rem; border: 2px solid #89cbbb; background: #214457; color: #fff3d8; font: inherit; cursor: pointer; }
+.map-banner button:hover { background: #35706b; }
+@keyframes town-pin-pulse { 50% { transform: scale(1.18); } }
+@media (prefers-reduced-motion: reduce) { .town-pin-dot { animation: none; } }
+@media (max-width: 640px) { .map-banner { top: auto; bottom: 12px; white-space: normal; width: calc(100vw - 24px); } }
+.town-pin.is-flipped { flex-direction: row-reverse; transform: translate(calc(-100% + 9px), -50%); }
+@media (max-width: 640px) { .town-pin-label { max-width: 9rem; font-size: .66rem; } }
+
+/* ---- Archive panel restyle: switches, chips, tabs, full-width cards ---- */
+.archive-window { width: min(820px, 100%); }
+.search-row input { font-size: 1.05rem; padding: .75rem .85rem; }
+.search-row input::placeholder { color: #8ea3ad; }
+.filters { display: flex; flex-direction: column; align-items: stretch; gap: .6rem; margin: .8rem 0 1rem; padding: .7rem .8rem; border: 2px solid #2f4a63; background: #13233a; }
+.filter-switches { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; }
+.toggle { gap: .55rem; font: 700 .8rem monospace; color: #f2e3d0; }
+.toggle .hint { color: #9fb6bd; font-weight: 400; }
+.toggle input[type="checkbox"] { appearance: none; -webkit-appearance: none; position: relative; flex: none; width: 36px; height: 20px; margin: 0; border: 2px solid #72858b; background: #0d1c32; cursor: pointer; transition: background .15s, border-color .15s; }
+.toggle input[type="checkbox"]::before { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: #9fb6bd; transition: transform .15s, background .15s; }
+.toggle input[type="checkbox"]:checked { border-color: #69e1cc; background: #1f5a57; }
+.toggle input[type="checkbox"]:checked::before { transform: translateX(16px); background: #69e1cc; }
+.toggle input[type="checkbox"]:disabled { cursor: default; }
+.chips { align-items: center; gap: .35rem; }
+.chips-label { margin-right: .3rem; color: #9fb6bd; font: 700 .7rem monospace; letter-spacing: .08em; text-transform: uppercase; }
+.chip { padding: .3rem .6rem; text-transform: none; font: 700 .74rem monospace; }
+.chip:hover { border-color: #69e1cc; color: #fff1d8; }
+
+.result-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 3px solid #a46776; }
+.result-tab { padding: .6rem .5rem; border: 2px solid #3d5670; border-bottom: 0; background: #172a42; color: #b9c8cc; font: 700 .8rem monospace; cursor: pointer; }
+.result-tab + .result-tab { border-left: 0; }
+.result-tab:hover { color: #fff1d8; background: #1f3651; }
+.result-tab.is-active { position: relative; background: #a46776; border-color: #a46776; color: #fff4e2; }
+.result-tab .count { display: inline-block; min-width: 1.4em; margin-left: .3rem; padding: 0 .3rem; background: #0d1c32; color: #f7d6aa; font-weight: 700; }
+.result-tab.is-active .count { background: #fff1d8; color: #6b3b48; }
+.results-note { margin: .55rem 0 .7rem; color: #9fb6bd; font-size: .8rem; font-style: italic; }
+.result-list { display: flex; flex-direction: column; gap: .6rem; }
+.result-list .result-card { margin: 0; padding: .85rem 1rem; }
+.result-list .result-card h3 { margin: .45rem 0 .3rem; font-size: 1.05rem; }
+.result-list .result-card p { margin: 0 0 .6rem; color: #e3e9ea; font-size: .95rem; line-height: 1.55; }
+.result-list .result-card footer { color: #a8bcc2; }
+.result-card .pin-button { padding: .35rem .8rem; border: 2px solid #69e1cc; border-radius: 0; font: 700 .74rem monospace; }
+.badge { border-radius: 0; font-family: monospace; }
+@media (max-width: 640px) {
+  .result-tab { font-size: .68rem; padding: .5rem .25rem; }
+  .result-tab .count { margin-left: .15rem; }
+}
+@media (prefers-reduced-motion: reduce) { .toggle input[type="checkbox"], .toggle input[type="checkbox"]::before { transition: none; } }
+
+/* ---- Time made visible: the town darkens toward the last ferry ---- */
+.town-map::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: #0b1238;
+  mix-blend-mode: multiply;
+  opacity: calc(var(--night, 0) * .38);
+  transition: opacity 1.2s ease;
+}
+/* Dim and cool the art itself as the evening runs out; lanterns read brighter by contrast. */
+.town-map canvas { filter: brightness(calc(1 - var(--night, 0) * .26)) saturate(calc(1 - var(--night, 0) * .18)) hue-rotate(calc(var(--night, 0) * -12deg)); transition: filter 1.2s ease; }
+.clock-chip.is-late { border-color: #f7b572; color: #ffd9a0; box-shadow: 0 0 0 2px #f7b57255, 3px 3px 0 #09182b; }
+.clock-chip.is-urgent { border-color: #ff6b7a; color: #ffd0d5; animation: clock-urgent 1s ease-in-out infinite; }
+@keyframes clock-urgent { 50% { box-shadow: 0 0 0 4px #ff6b7a66, 3px 3px 0 #09182b; } }
+@media (prefers-reduced-motion: reduce) { .town-map::before { transition: none; } .clock-chip.is-urgent { animation: none; } }

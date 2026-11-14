@@ -6,7 +6,7 @@
       "place": "Upper Station",
       "text": "You arrive at Upper Station. You have dinner to find, a show to catch, and the last ferry home.",
       "guide": "Lantern Night passes are going fast. I found a page where you can get your return ticket now.",
-      "location": [37.001, -150.004],
+      "location": [37.000003, -150.000007],
       "choices": [
         { "label": "Open Ping’s ticket page", "next": "ferry-ticket-page", "timeCost": 0 }
       ]
@@ -56,7 +56,7 @@
       "place": "Low Market steps",
       "text": "TODO-CONTENT Narration: getting hungry near the Low Market steps.",
       "guide": "TODO-CONTENT Ping says the Low Market is closed tonight and recommends Calla's 7:15 PM table.",
-      "location": [37.0015, -150.0015],
+      "location": [36.99793, -150.001304],
       "choices": [
         {
           "label": "TODO-CONTENT Book Calla’s 7:15 table",
@@ -78,7 +78,7 @@
       "place": "Calla",
       "text": "TODO-CONTENT Dinner at Calla.",
       "guide": "",
-      "location": [37.0005, -150.003],
+      "location": [37.000082, -149.998843],
       "choices": [
         { "label": "TODO-CONTENT Head to the Flats", "next": "wifi-ping", "timeCost": 45 }
       ]
@@ -88,7 +88,7 @@
       "place": "Low Market",
       "text": "TODO-CONTENT Dinner at the Low Market (the vendor from market-ama-open could appear here).",
       "guide": "",
-      "location": [37.002, -149.999],
+      "location": [36.99987, -150.00147],
       "choices": [
         { "label": "TODO-CONTENT Head to the Flats", "next": "wifi-ping", "timeCost": 45 }
       ]
@@ -99,7 +99,7 @@
       "place": "The Flats",
       "text": "TODO-CONTENT Narration: show details won't load on your phone.",
       "guide": "TODO-CONTENT Ping suggests connecting to CityNet Free.",
-      "location": [36.9975, -149.997],
+      "location": [36.998754, -149.997114],
       "choices": [
         {
           "label": "TODO-CONTENT Connect to CityNet Free",
@@ -159,7 +159,7 @@
       "place": "The Seawall",
       "text": "TODO-CONTENT Narration: Small Hours finishes their set; the crowd calls for an encore.",
       "guide": "TODO-CONTENT Ping says the last ferry is at 10:45 PM and there is time for the encore.",
-      "location": [36.999, -150.0],
+      "location": [36.998249, -149.999042],
       "choices": [
         {
           "label": "TODO-CONTENT Stay for the encore",
