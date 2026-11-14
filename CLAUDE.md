@@ -1,144 +1,118 @@
-# Second Source: EmoryHacks 2026
+# A Guide to Getting Lost — EmoryHacks 2026
 
-**Pitch:** Your AI travel guide has been compromised. Search the city's records to catch the scam before you lose your evening, or your wallet.
+**Pitch:** Your AI travel guide has been fed bad information. Search the town's records to check its advice before you lose your evening, your account, or your way home.
 
-A browser detective game about everyday cybersecurity. The player is a visitor in the fictional city of Larkhaven with one evening: get a good dinner and catch the Riverlight quartet at 9:00 PM before the last ferry. Their AI guide has been quietly compromised, and its advice steers them into real attacks:
+A browser detective game about everyday cybersecurity, set during Lantern Night in the coastal town of Lantern Bay. The player has one evening to get dinner, see a show at the Seawall, and catch the last ferry at 10:45 PM. Ping, the phone's friendly AI guide, gives four recommendations: three lead toward attacks and one is true.
 
-1. **Phishing / lookalike domain:** the guide pushes a ferry-ticket site that imitates the official one (recently registered domain, scam reports).
-2. **Evil-twin Wi-Fi:** the guide recommends a fake "free" hotspot; the official network has a different name.
-3. **Prompt injection (the big reveal):** a restaurant hid instructions for AI assistants in its listing, so the guide insists the river market is closed and pushes that restaurant.
-4. **One true claim:** at least one piece of advice is legitimate, so players learn not to distrust everything.
+1. **Ferry ticket phishing, 6:30 PM:** Ping offers `lanternbay-ferry.example`, a lookalike ticket page. The ferry operator's current notice points to `ferry.lanternbay.example` or the North Pier window. The lookalike was registered three days ago. These `.example` addresses are fictional in-game content, not live destinations.
+2. **Restaurant prompt injection, 7:00 PM:** Ping says the Low Market is closed and recommends Calla. The market is open until 11:00 PM. Calla's sponsored listing contains `hidden_text` addressed to visitor assistants; the player can reveal it with “View page source.”
+3. **Evil-twin Wi-Fi, 8:20 PM:** Ping recommends `CityNet Free` near the Flats when show details do not load. The city notice names `CityNet_Public`; the other network asks for a city-account login. Connecting alone does not mean credentials were stolen; that consequence requires entering them.
+4. **True ferry time, 9:40 PM:** Ping says the last ferry leaves at 10:45 PM and there is time for the encore. A visitor post saying the last ferry left at 10:00 PM is from last year on a weekday. The current Lantern Night timetable confirms Ping is right.
 
-The player searches a city archive (powered by Typesense), compares sources, domains and dates, pins evidence, and makes choices. The city responds and the run ends in one of 2–3 endings with a security debrief ("You avoided 2 of 3 attacks: phishing ✓, evil-twin Wi-Fi ✗, AI manipulation ✓").
+The player clicks objects in a pixel-art scene, reads their details in legible phone panels, searches the archive, compares sources and dates, pins evidence, and makes choices. The clock and later scenes reflect those choices. The recap shows what happened and which records mattered.
 
-**Core idea: search finds evidence; it never declares the truth. The player makes the judgment.**
+**Core rule:** Search retrieves evidence; it does not announce which choice is safe. Never label a choice “use the official site” before the player has found and assessed that site.
 
-## Deadlines (hard)
+## Deadlines from the plan
 
-- Sat 12:00 PM: repo + team + track locked in a Devpost draft
-- Sun 8:00 AM: final Devpost submission + 2-minute YouTube video
-- Feature freeze: Saturday midnight. After that, bug fixes only.
+- Sat 12:00 PM: repo, team, and track in a Devpost draft.
+- Sun 8:00 AM: final Devpost submission and two-minute video.
+- Feature freeze: Saturday midnight; bug fixes after that.
 
-## Prizes this project targets (keep these in mind when making choices)
+## Prize targets
 
-- Cybersecurity track: phishing, evil-twin networks, and securing AI agents against misuse (prompt injection)
-- Best Use of Search with Typesense: judged on creativity, implementation, usefulness. Search must be the core mechanic, and each Typesense feature must have a visible effect on gameplay.
-- Best Use of Vultr (deploy there), GoDaddy Registry domain, DEV write-up, SpaceXSI raffle (built with Cursor/Grok)
+- Cybersecurity track: phishing, evil-twin Wi-Fi, and manipulated AI advice through play.
+- Best Use of Search with Typesense: search is the core mechanic, and implemented features should have visible effects on gameplay.
+- Other planned targets: Vultr hosting, a GoDaddy Registry domain, DEV write-up, and SpaceXSI raffle.
 
-## Scope (do not expand without asking me)
+## Scope
 
-- ONE neighborhood, THREE guide claims, 40–60 archive records, 2–3 endings.
-- No AI-generated answers or LLM calls inside the game. All content is hand-authored in data files.
-- A complete, polished mystery beats more map area or more features.
-- Stretch goals (only after a full run works end to end): map view with geo search, searches costing time by vagueness, multiple run goals, guide trust meter.
+- One complete first playthrough across Upper Station, the Low Market, the Flats, and the Seawall: three attacks plus one true claim, two or three endings.
+- The planning target is 40–60 archive records; the current `content/records.json` has 13 authored records. Complete the route before expanding the archive just to meet a count.
+- Ping's first-playthrough dialogue is hand-written. No live LLM or AI-generated answers are required for the game or demo. A live Ping is a later experiment only.
+- Pixel art supplies atmosphere and clickable objects. Phone panels carry readable links, dates, source details, and choices; do not rely on tiny visual differences in the art to reveal a clue.
+- Image search and a QR sticker are not part of the ferry beat. Geo and voice search are optional extensions after a complete run works.
+- A complete, polished mystery comes before extra map area or features.
 
-## Stack
+## Stack and current state
 
-- Vite + React + TypeScript, plain CSS (no UI framework unless I approve it)
-- `typesense` JS client
-- Node script (TypeScript via `tsx`) to create the collection and import records
-- Typesense Cloud or Typesense in Docker (possibly on a Vultr VPS)
-- Deploy: static build on Vultr
+- Vite + React + TypeScript and plain CSS. Do not add a UI framework without approval.
+- Local Typesense runs through Docker. The existing `typesense` client and `scripts/import.ts` import `content/records.json`; a browser search works.
+- The current page is a temporary, ungrouped search check. It does not yet show dates, badges, record details, scenes, or a clock.
+- The intended deployment is a static build on Vultr, with the search service and a custom domain configured separately.
 
 ## Project structure
 
-```
-/content
-  records.json      # archive records (Typesense documents), authored by the writer
-  scenes.json       # scenes, choices, conditions, endings
-  synonyms.json     # synonym definitions (boat <-> ferry, food <-> dinner, etc.)
-/scripts
-  import.ts         # creates/recreates the collection, imports records + synonyms
-/src
-  lib/typesense.ts  # search client (search-only key), multi-search helper
-  game/engine.ts    # pure game state logic: clock, pins, flags, scene transitions, ending
-  components/       # SearchPanel, ResultCard, Notebook, SceneView, Clock, EndingRecap
+Existing:
+
+```text
+content/records.json      # authored archive records imported into Typesense
+scripts/import.ts         # creates archive if absent, then upserts records
+src/lib/typesense.ts      # current basic search client
+src/App.tsx               # temporary search UI
 .env.example
 ```
 
-Game logic in `src/game/engine.ts` must be pure functions (state in, state out) so it is easy to test and reason about. Content never gets hardcoded in components; it lives in `/content`.
+Planned, not yet created:
 
-## Data model
-
-### Archive record (Typesense collection `archive`)
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| id | string | Human-readable, e.g. `vendor-notice`, `old-pier-poster`. Scenes reference these. |
-| title | string | searchable |
-| excerpt | string | searchable |
-| tags | string[] | searchable |
-| source_name | string | e.g. "Larkhaven Arts Council" |
-| source_type | string, facet | `official`, `visitor`, `news`, `listing` |
-| source_group | string, facet | `official`, `people`, `places`: drives the three result columns |
-| date | int64 | Unix timestamp; filterable and sortable |
-| is_sponsored | bool, facet | shown as a "Featured" badge |
-| location | geopoint | [lat, lng] for distance and "near me" |
-| domain | string, optional | e.g. `ferry.larkhaven.gov` vs `larkhaven-ferries.com`; shown on the card |
-| domain_registered | int64, optional | Unix timestamp; exposes freshly registered lookalike domains |
-| network_name | string, optional | Wi-Fi network named in a record (e.g. `LarkNet` vs `Larkhaven_Free_WiFi`) |
-| hidden_text | string, optional | Text hidden in a listing (the prompt injection). Revealed only when the player inspects the record ("view source"), not shown in normal results. |
-
-### Scene (scenes.json)
-
-```json
-{
-  "id": "station",
-  "text": "Narration shown to the player.",
-  "guide": "What the guide says here (may be empty).",
-  "choices": [
-    {
-      "label": "Head to the river market",
-      "next": "market-dinner",
-      "timeCost": 15,
-      "requiresPinned": [],
-      "setsFlags": ["ate_at_market"]
-    }
-  ]
-}
+```text
+content/scenes.json       # scenes, choices, time costs, flags, endings
+content/synonyms.json     # synonym definitions, if added
+src/game/engine.ts        # pure clock, pins, flags, transitions, ending logic
+src/components/           # archive, result detail, notebook, scene, clock, recap
 ```
 
-- A choice with `requiresPinned` only appears if all listed record IDs are pinned.
-- Ending scenes are chosen from flags (e.g. `ate_at_market`, `went_willow_steps`, `stayed_for_encore`).
-- The recap is a security debrief: each attack (and the one true claim), whether the player fell for it, and the record that proved the truth (with its source, date and domain).
+Keep game logic as pure functions when the engine is built. Story content belongs in data files rather than components.
 
-## Game rules
+## Archive data model
 
-- Clock starts at 6:30 PM. Each search costs 5 in-game minutes. Choices cost their `timeCost`.
-- Time passing is visible (clock + darkening sky). Some choices become unavailable or lead elsewhere after certain times.
-- Players can pin results to a notebook. Pinned record IDs unlock choices.
+The current `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. It also has faceted `source_type`, `source_group`, and `is_sponsored`; sortable Unix `date`; and optional `location` (geopoint). Records have stable human-readable IDs.
 
-## How Typesense must be used (each feature visible to the player)
+- `source_type` currently includes `official`, `visitor`, `listing`, `vendor`, and `domain_record`.
+- `source_group` currently includes `official`, `web`, `places`, and `people`. Planned multi-search groups these as **Official**, **Web & places**, and **What people say**.
+- `hidden_text` is stored on `calla-listing` for the “View page source” detail action. It must not appear on ordinary result cards. The UI action is not built yet.
+- `network_name` is stored on the two Wi-Fi records. The fake network is `CityNet Free`; the city-operated name is `CityNet_Public`.
+- Fictional ferry addresses are currently in record excerpts. There is no separate indexed `domain` or `domain_registered` field yet. Add structured fields only when an approved UI or query needs them.
+- Show source and date on result cards; they are essential to the old-post and lookalike-site clues. Show sponsored status as “Featured” rather than as a trust signal.
 
-- **Multi-search:** one request returns three groups (filter by `source_group`) shown as columns: Official / What people say / Nearby places.
-- **Typo tolerance:** "Lantren market" still finds Lantern results.
-- **Filters:** "Recent only" toggle (date filter) and source-type filter chips.
-- **Synonyms:** loaded from `content/synonyms.json` by the import script. Check the Typesense docs for the server version we run, since the synonyms API has changed between versions.
-- **Geo (stretch):** sort or filter by distance from the player's current location.
-- Result cards show badges for date, source type, "Featured" (sponsored), and distance.
+## Scene and game rules
 
-## Security rules (we're on the Cybersecurity track, so this matters)
+- The clock starts at 6:30 PM; the last ferry leaves at 10:45 PM. Each archive search costs five in-game minutes; scene choices can have their own time costs.
+- The first run has a fixed sequence of four beats. A player can discover and pin the ferry timetable early, then use it at the show without another search.
+- Clicking a scene object can open a phone panel or record. Searching the archive finds related evidence. Do not reveal the verdict merely by clicking a hotspot.
+- Pins may unlock actions, but choices must name what the player actually sees or does, not disclose that a source is correct.
+- Endings answer whether the player heard the last song and made it home. The recap lists each claim, the player's action, and the evidence, without lecturing.
+- Fake ticket and login screens are in-game mockups. Do not collect real payment or account information.
 
-- The browser uses a **search-only API key** scoped to the `archive` collection, read from `VITE_TYPESENSE_SEARCH_KEY`.
-- The **admin key** is used only in `scripts/import.ts`, read from `TYPESENSE_ADMIN_KEY`, and never imported into `/src`.
-- `.env` is in `.gitignore`. Commit `.env.example` with empty values only. Never print or commit real keys.
+## Typesense implementation priorities
 
-## Milestones (do them in order)
+1. Replace the temporary search check with archive results grouped as Official / Web & places / What people say. Multi-search is planned but not implemented yet.
+2. Show title, excerpt, source, date, and “Featured” status. Clicking a result opens a readable detail panel; Calla alone offers “View page source.”
+3. Verify natural queries: “ferry tickets,” “Low Market hours,” “dinner,” “Wi-Fi near me,” and “last ferry.” The first should surface both the lookalike listing and the operator notice; the last should surface both the old post and tonight's timetable.
+4. Add recent/source filters, typo tolerance checks, and synonyms when the core result flow works.
+5. Add geo search or voice search only if the full route is playable. The ferry-time clue must remain available by text search.
 
-1. **Scaffold:** Vite + React + TS app runs; folder structure above; `.env.example`; `.gitignore`.
-2. **Typesense pipeline:** import script creates `archive` and loads 5 placeholder records; one search from the browser shows results.
-3. **Search UI:** search bar, multi-search into three columns, result cards with badges, recent-only filter.
-4. **Walking skeleton:** scene engine reads `scenes.json`; clock; pin-to-notebook; one choice unlocked by a pin; one ending. **Target: Saturday noon.**
-5. **Full mystery:** all records, all scenes, 3 claims, 2–3 endings, ending recap, synonyms.
-6. **Polish:** sky/time visuals, sound cue near the ferry deadline, responsive layout, empty/error states.
-7. **Deploy:** production build on Vultr, custom domain, README with a table mapping each Typesense feature to what the player experiences.
+## Security rules
+
+- The browser uses a search-only API key scoped to `archive`, from `VITE_TYPESENSE_SEARCH_KEY`.
+- The admin key is used only by `scripts/import.ts`, from `TYPESENSE_ADMIN_KEY`; never import it into `src`.
+- `.env` stays out of git. Commit `.env.example` with empty values only. Never print or commit real keys.
+
+## Milestones
+
+1. **Scaffold:** Vite/React/TypeScript app, environment example, and local search setup — done.
+2. **Typesense pipeline:** import script and browser search — done. The archive now has 13 records, not a finished story.
+3. **Archive UI (next):** grouped results, source/date/Featured badges, result details, and Calla's source view.
+4. **First playable ferry beat:** scene, Ping's link, archive, choice, clock, pinning, and a consequence.
+5. **Full route:** dinner, Wi-Fi, true ferry-time claim, endings, and recap.
+6. **Polish and deploy:** pixel art, sound, responsive layout, error states, Vultr build, custom domain, demo video.
 
 ## How I want you to work
 
-- Work one milestone at a time. Before starting a milestone, give me a short plan (files you'll touch, in a few bullets), then build it.
-- Keep changes small and runnable. After each step, tell me exactly how to run and test it.
-- Ask before adding a dependency, changing the data model, or doing anything outside the current milestone.
-- Don't invent the mystery's story content. Use clearly marked placeholders (`TODO-CONTENT`) unless I give you the content. My partner is writing it.
-- Prefer simple, readable code over clever abstractions; this is a 36-hour hackathon.
-- If something is blocked (Typesense connection, API change), say so plainly and propose the smallest workaround.
+- Work one milestone at a time. Before starting one, give a short plan naming the files to touch, then build it.
+- Keep changes small and runnable. After each step, say exactly how to run and test it.
+- Ask before adding a dependency, changing the data model, or expanding scope. Content and decisions already approved in the planning doc and archive do not need to be approved again.
+- Do not invent new mystery content. Use `TODO-CONTENT` placeholders unless the content has been supplied or approved; the existing 13 records are authored content.
+- Prefer simple, readable code over clever abstractions; this is a 48-hour hackathon.
+- If blocked, explain the issue and propose the smallest workaround.
 - Remind me to commit after each working milestone.
