@@ -27,7 +27,7 @@ export function PixelTownScene({ interactive, showLabels, onArchive, onPhone, on
       context.imageSmoothingQuality = 'high'
       context.drawImage(image, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT)
     }
-    image.src = '/art/lantern-bay-map.png'
+    image.src = '/art/lantern-bay-map.jpg'
   }, [])
 
   return (

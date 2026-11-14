@@ -41,6 +41,8 @@ export type Story = {
   scenes: Scene[]
   endings: Ending[]
   debrief?: DebriefBeat[]
+  // Past this time ("HH:MM"), the run ends with `flag` set. List an ending requiring that flag first.
+  deadline?: { time: string; flag: string }
 }
 
 export type GameState = {
@@ -102,7 +104,25 @@ export function pickEnding(story: Story, flags: string[]): Ending {
   return ending
 }
 
+// "22:45" -> minutes since midnight
+export function parseClock(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
+}
+
+// If the clock has passed the story's deadline, set the deadline flag and end the run.
+// Runs after every search and choice, so it overrides an ending reached too late.
+export function applyDeadline(state: GameState, story: Story): GameState {
+  if (!story.deadline || state.minutes <= parseClock(story.deadline.time)) return state
+  const flags = [...new Set([...state.flags, story.deadline.flag])]
+  return { ...state, flags, endingId: pickEnding(story, flags).id }
+}
+
 export function choose(state: GameState, story: Story, choice: Choice): GameState {
+  return applyDeadline(chooseWithoutDeadline(state, story, choice), story)
+}
+
+function chooseWithoutDeadline(state: GameState, story: Story, choice: Choice): GameState {
   const flags = [...new Set([...state.flags, ...(choice.setsFlags ?? [])])]
   const minutes = state.minutes + choice.timeCost
   if (choice.endsRun) return { ...state, minutes, flags, endingId: pickEnding(story, flags).id }
@@ -139,6 +159,12 @@ export function validateStory(story: Story, recordIds?: Set<string>): string[] {
   const problems: string[] = []
   const ids = new Set(story.scenes.map((s) => s.id))
   const setFlags = new Set(story.scenes.flatMap((s) => s.choices.flatMap((c) => c.setsFlags ?? [])))
+  if (story.deadline) {
+    setFlags.add(story.deadline.flag)
+    if (!story.endings.some((e) => e.requiresFlags.includes(story.deadline!.flag))) {
+      problems.push(`no ending requires the deadline flag "${story.deadline.flag}"`)
+    }
+  }
   if (!ids.has(story.start)) problems.push(`start scene "${story.start}" does not exist`)
   for (const scene of story.scenes) {
     for (const choice of scene.choices) {
@@ -176,7 +202,7 @@ export type GameAction =
 export function gameReducer(story: Story) {
   return (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
-      case 'search': return spendSearch(state)
+      case 'search': return applyDeadline(spendSearch(state), story)
       case 'togglePin': return togglePin(state, action.record)
       case 'choose': return choose(state, story, action.choice)
       case 'restart': return initialState(story)

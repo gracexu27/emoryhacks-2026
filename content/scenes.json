@@ -177,7 +177,15 @@
     }
   ],
 
+  "deadline": { "time": "22:45", "flag": "missed_last_ferry" },
+
   "endings": [
+    {
+      "id": "ending-missed-ferry",
+      "title": "TODO-CONTENT Missed the last ferry",
+      "text": "TODO-CONTENT The clock passed 10:45 PM before you reached North Pier.",
+      "requiresFlags": ["missed_last_ferry"]
+    },
     {
       "id": "ending-last-song-home",
       "title": "TODO-CONTENT Heard the last song and made it home",

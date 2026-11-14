@@ -66,14 +66,20 @@ async function main() {
   if (existing.some((collection) => collection.name === 'archive')) {
     await client.collections('archive').delete()
   }
+  // Synonyms (Typesense 30 synonym sets): create/replace the set, then link it in the collection schema
+  // so every search, including the browser's search-only key, uses it automatically.
+  const synonyms = JSON.parse(await readFile('content/synonyms.json', 'utf8'))
+  await client.synonymSets(synonyms.name).upsert({ items: synonyms.items })
+
   console.log(enableMediaSearch ? 'Creating archive with CLIP and Whisper models…' : 'Creating archive collection…')
   const fields = enableMediaSearch
     ? [...schema.fields]
     : schema.fields.filter((field) => !['image_url', 'image', 'embedding'].includes(field.name))
   const collectionSchema = enableMediaSearch
-    ? { ...schema, fields }
-    : { name: schema.name, fields }
+    ? { ...schema, fields, synonym_sets: [synonyms.name] }
+    : { name: schema.name, fields, synonym_sets: [synonyms.name] }
   await client.collections().create(collectionSchema)
+  console.log(`Linked ${synonyms.items.length} synonym groups`)
 
   const records = JSON.parse(await readFile('content/records.json', 'utf8'))
   if (!Array.isArray(records)) throw new Error('content/records.json must be an array')

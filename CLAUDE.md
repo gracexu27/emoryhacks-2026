@@ -49,22 +49,19 @@ Existing:
 
 ```text
 content/records.json      # 13 authored archive records
-content/scenes.json       # placeholder scene and ending skeleton
+content/scenes.json       # full route skeleton (ferry → dinner → Wi-Fi → encore), endings, debrief; TODO-CONTENT text
 content/settings.json     # fictional day, near-me radius, schematic map bounds
-scripts/import.ts         # recreates archive and imports records
+content/synonyms.json     # Typesense synonym set (ferry/boat, dinner/food/where to eat, wifi/internet, …)
+scripts/import.ts         # recreates archive, upserts the synonym set, imports records
 src/lib/typesense.ts      # multi-search, filters, and geo sorting
 src/game/engine.ts        # pure clock, pins, flags, scene transitions
 src/components/           # search, results, map, notebook, scene, clock, recap
 src/App.tsx               # wires the walking skeleton
-public/art/lantern-bay-map.png # opening map artwork
+public/art/lantern-bay-map.jpg # opening map artwork (JPEG q90 of the original PNG, 1.2 MB)
 .env.example
 ```
 
-Planned, not yet created:
-
-```text
-content/synonyms.json     # synonym definitions, if added
-```
+Synonyms use Typesense 30 synonym sets: the import script `PUT`s the set from `content/synonyms.json` and links it via the collection's `synonym_sets`, so the browser's search-only key needs nothing extra. Avoid broad words that appear in unrelated records (e.g. "show" matched "doesn't show up").
 
 Keep game logic as pure functions. Story content belongs in data files rather than components.
 
@@ -88,7 +85,8 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 - The route is ferry → dinner → Wi-Fi → encore. Outcome flags: `avoided_phishing`/`fell_for_phishing`, `avoided_injection`/`fell_for_injection`, `avoided_evil_twin`/`fell_for_evil_twin`, `trusted_true_claim`/`doubted_true_claim`.
 - `debrief` has one entry per claim: `title`, `claim` (Ping's words), `outcomes` (`flag`, `safe`, `text`; first matching flag wins) and `evidence` (record ids, shown with source and date, marked if the player pinned them).
 - In dev, the browser console warns about broken scene links, unknown record ids, and flags no choice sets.
-- The clock starts at 6:30 PM; the last ferry leaves at 10:45 PM. Each submitted archive search costs five in-game minutes; scene choices can have their own time costs.
+- The clock starts at 6:30 PM; the last ferry leaves at 10:45 PM. Each submitted archive search costs five in-game minutes (failed searches are free); scene choices can have their own time costs.
+- `deadline: { "time": "22:45", "flag": "missed_last_ferry" }` in `scenes.json`: after any search or choice that pushes the clock past it, the run ends with that flag set, so `ending-missed-ferry` (listed first) wins. On the best route the player can afford about 15 searches.
 - A player can discover and pin the ferry timetable early, then use it at the show without another search.
 - Clicking a scene object can open a phone panel or record. Searching the archive finds related evidence. Do not reveal the verdict merely by clicking a hotspot.
 - Pins may unlock actions, but choices must name what the player actually sees or does, not disclose that a source is correct.

@@ -39,28 +39,31 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin }: Props) 
   const [loading, setLoading] = useState(false)
   const [selected, setSelected] = useState<ArchiveHit | null>(null) // record open in the detail view
 
-  async function runSearch(q: string, nextFilters: SearchFilters) {
-    if (!q) return
+  // Returns true if the search succeeded.
+  async function runSearch(q: string, nextFilters: SearchFilters): Promise<boolean> {
+    if (!q) return false
     setLoading(true)
     setError('')
     try {
       setResults(await multiSearchArchive(q, nextFilters, origin))
       setSelected(null)
       setLastQuery(q)
+      return true
     } catch (cause) {
-      setResults(null)
+      console.error('Archive search failed:', cause) // details for us; the player sees a friendly message
       setError(cause instanceof Error ? cause.message : 'Search failed')
+      return false
     } finally {
       setLoading(false)
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  // A search only costs in-game time if it actually returned results.
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const q = query.trim()
     if (!q) return
-    onSearch()
-    runSearch(q, filters)
+    if (await runSearch(q, filters)) onSearch()
   }
 
   // Changing a filter re-runs the last search (free) so the effect is visible immediately.
@@ -137,7 +140,19 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin }: Props) 
       </div>
 
       {!configured && <p role="status" className="notice">Run the import script, then restart the dev server.</p>}
-      {error && <p role="alert" className="notice notice-error">Search failed: {error}</p>}
+      {error && (
+        <p role="alert" className="notice notice-error">
+          The archive isn’t answering right now. The rain must be playing with the signal. Try again in a moment; that search didn’t cost you any time.
+        </p>
+      )}
+      {!error && !results && configured && (
+        <p className="notice">Search for anything Ping mentions: a place, a web address, a time. Each search takes 5 minutes of your evening.</p>
+      )}
+      {!error && !selected && results && allHits.length === 0 && (
+        <p role="status" className="notice">
+          Nothing in the archive matches “{lastQuery}”. Try fewer words{filters.recentOnly || filters.nearMe || filters.sourceTypes.length ? ', or turn off some filters' : ''}.
+        </p>
+      )}
 
       {selected && (
         <RecordDetail

@@ -1,0 +1,11 @@
+{
+  "name": "archive-synonyms",
+  "items": [
+    { "id": "ferry", "synonyms": ["ferry", "boat"] },
+    { "id": "food", "synonyms": ["dinner", "food", "eat", "restaurant", "meal", "where to eat", "something to eat", "hungry"] },
+    { "id": "wifi", "synonyms": ["wifi", "internet", "hotspot", "network"] },
+    { "id": "ticket", "synonyms": ["ticket", "tickets", "pass", "passes"] },
+    { "id": "timetable", "synonyms": ["timetable", "schedule", "departures"] },
+    { "id": "open-hours", "synonyms": ["hours", "open", "closed"] }
+  ]
+}
