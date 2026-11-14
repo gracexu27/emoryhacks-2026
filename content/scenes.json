@@ -1,0 +1,67 @@
+{
+  "start": "todo-start",
+  "scenes": [
+    {
+      "id": "todo-start",
+      "text": "TODO-CONTENT Opening narration. The player arrives in town.",
+      "guide": "Lantern Night passes are going fast. I found a page where you can get your return ticket now.",
+      "location": [
+        37.001,
+        -150.004
+      ],
+      "choices": [
+        {
+          "label": "Open Ping’s ticket page",
+          "next": "todo-harbor",
+          "timeCost": 15
+        }
+      ]
+    },
+    {
+      "id": "todo-harbor",
+      "text": "TODO-CONTENT Ticket page at lanternbay-ferry.example.",
+      "guide": "",
+      "location": [
+        36.999,
+        -150.001
+      ],
+      "choices": [
+        {
+          "label": "Enter payment details at lanternbay-ferry.example",
+          "endsRun": true,
+          "timeCost": 10,
+          "setsFlags": [
+            "fell_for_phishing"
+          ]
+        },
+        {
+          "label": "Open ferry.lanternbay.example from the pinned notice",
+          "endsRun": true,
+          "timeCost": 10,
+          "requiresPinned": [
+            "ferry-official-tickets"
+          ],
+          "setsFlags": [
+            "avoided_phishing"
+          ]
+        }
+      ]
+    }
+  ],
+  "endings": [
+    {
+      "id": "todo-ending-good",
+      "title": "TODO-CONTENT Good ending",
+      "text": "TODO-CONTENT The player checked the source and it paid off.",
+      "requiresFlags": [
+        "avoided_phishing"
+      ]
+    },
+    {
+      "id": "todo-ending-default",
+      "title": "TODO-CONTENT Default ending",
+      "text": "TODO-CONTENT Catch-all ending.",
+      "requiresFlags": []
+    }
+  ]
+}

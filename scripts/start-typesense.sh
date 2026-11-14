@@ -19,10 +19,10 @@ fi
 if docker container inspect emoryhacks-typesense >/dev/null 2>&1; then
   docker start emoryhacks-typesense >/dev/null
 else
-  docker volume create emoryhacks-typesense-data >/dev/null
+  docker volume create emoryhacks-typesense-merge-data >/dev/null
   docker run -d --name emoryhacks-typesense \
     -p 127.0.0.1:8108:8108 \
-    -v emoryhacks-typesense-data:/data \
+    -v emoryhacks-typesense-merge-data:/data \
     typesense/typesense:30.2 \
     --data-dir /data \
     --api-key="${TYPESENSE_ADMIN_KEY}" \
