@@ -118,7 +118,5 @@ Vite · React · TypeScript · plain CSS · [Typesense](https://typesense.org) 3
 
 ## Team
 
-- Grace Xu: TODO role
-- Leah Triantos: TODO role
-
-TODO: art credit for `public/art/lantern-bay-map.jpg`.
+- Grace Xu
+- Leah Triantos
