@@ -4,6 +4,7 @@ import type { ArchiveRecord } from '../lib/typesense'
 type Props = {
   scene: Scene
   choices: Choice[]
+  lockedCount?: number // choices hidden until the player pins the right evidence
   onChoose: (choice: Choice) => void
   onOpenArchive: () => void
   ticketListing?: ArchiveRecord
@@ -14,7 +15,7 @@ type Props = {
 
 // Narration (the world) and Ping (a character) are visually separate, so the player never
 // mistakes the narrator's facts for Ping's advice.
-export function SceneView({ scene, choices, onChoose, onOpenArchive, ticketListing, dinnerListing, wifiListing, publicWifiListing }: Props) {
+export function SceneView({ scene, choices, lockedCount = 0, onChoose, onOpenArchive, ticketListing, dinnerListing, wifiListing, publicWifiListing }: Props) {
   const canSearch = ['ferry-ticket-page', 'ferry-payment', 'ferry-page-closed', 'ferry-operator-page', 'ferry-operator-payment', 'ferry-operator-closed', 'dinner-ping', 'dinner-calla-page', 'dinner-market-arrival', 'wifi-ping', 'wifi-network-list', 'wifi-login-screen', 'wifi-seawall', 'encore-ping'].includes(scene.id)
   const choiceButtons = choices.map((choice) => (
     <button key={choice.label} type="button" className="choice" onClick={() => onChoose(choice)}>
@@ -84,6 +85,18 @@ export function SceneView({ scene, choices, onChoose, onOpenArchive, ticketListi
 
       <div className="choices" role="group" aria-label="What do you do?">
         {choiceButtons}
+        {lockedCount > 0 && (
+          <div className="choice choice-locked" role="note">
+            <svg className="choice-lock" width="14" height="16" viewBox="0 0 14 16" aria-hidden="true">
+              <rect x="1" y="7" width="12" height="8" fill="currentColor" />
+              <path d="M4 7V4a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" strokeWidth="2" />
+            </svg>
+            <span className="choice-label">
+              {lockedCount === 1 ? 'Another option might open up.' : `${lockedCount} other options might open up.`}
+              {' '}Search the archive and pin what you find.
+            </span>
+          </div>
+        )}
       </div>
     </section>
   )

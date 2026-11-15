@@ -24,8 +24,12 @@ export type ArchiveRecord = {
   network_name?: string
 }
 
-// A search result: the record plus its distance from the player (only when both have a location).
-export type ArchiveHit = ArchiveRecord & { distance_m?: number }
+// A search result: the record plus search-time extras that are not stored when pinned:
+// distance from the player, and Typesense highlight snippets ("<mark>" around matched words).
+export type ArchiveHit = ArchiveRecord & {
+  distance_m?: number
+  snippets?: { title?: string; excerpt?: string }
+}
 
 export type LatLng = [number, number]
 
@@ -97,7 +101,11 @@ function buildSort(filters: SearchFilters, origin: LatLng | null): string | unde
   return filters.nearMe ? `${geo},_text_match:desc` : `_text_match:desc,${geo}`
 }
 
-type RawHit = { document: ArchiveRecord; geo_distance_meters?: { location?: number } }
+type RawHit = {
+  document: ArchiveRecord
+  geo_distance_meters?: { location?: number }
+  highlight?: { title?: { snippet?: string }; excerpt?: { snippet?: string } }
+}
 
 // One request returns a relevance-ranked mixed list and three optional source views.
 export async function multiSearchArchive(
@@ -113,6 +121,9 @@ export async function multiSearchArchive(
       filter_by: buildFilter(group, filters, origin),
       sort_by: buildSort(filters, origin),
       exclude_fields: 'embedding',
+      highlight_fields: 'title,excerpt',
+      highlight_start_tag: '<mark>',
+      highlight_end_tag: '</mark>',
       per_page: group ? 10 : 30,
     })),
   })
@@ -124,7 +135,12 @@ export async function multiSearchArchive(
     const tab = index === 0 ? 'all' : SOURCE_GROUPS[index - 1]
     grouped[tab] = (result.hits ?? []).map((hit) => {
       const distance = hit.geo_distance_meters?.location
-      return distance === undefined || distance === NO_DISTANCE ? hit.document : { ...hit.document, distance_m: distance }
+      const result: ArchiveHit = {
+        ...hit.document,
+        snippets: { title: hit.highlight?.title?.snippet, excerpt: hit.highlight?.excerpt?.snippet },
+      }
+      if (distance !== undefined && distance !== NO_DISTANCE) result.distance_m = distance
+      return result
     })
   })
   return grouped
