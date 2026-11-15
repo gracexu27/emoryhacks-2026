@@ -245,7 +245,7 @@
       "text": "The page spins, but your show details still don't load. You leave the network and keep moving.",
       "guide": "",
       "choices": [
-        { "label": "Head to the Seawall and watch the concert", "next": "encore-ping", "timeCost": 80 }
+        { "label": "Head to the Seawall and watch the concert", "next": "encore-ping", "timeCost": 55 }
       ]
     },
     {
@@ -265,7 +265,7 @@
       "text": "The show details load. The band is about to start.",
       "guide": "",
       "choices": [
-        { "label": "Watch the concert", "next": "encore-ping", "timeCost": 65 }
+        { "label": "Watch the concert", "next": "encore-ping", "timeCost": 40 }
       ]
     },
     {
@@ -274,7 +274,7 @@
       "text": "You find the stage from the venue sign and the crowd. Your phone can wait.",
       "guide": "",
       "choices": [
-        { "label": "Watch the concert", "next": "encore-ping", "timeCost": 65 }
+        { "label": "Watch the concert", "next": "encore-ping", "timeCost": 40 }
       ]
     },
 
