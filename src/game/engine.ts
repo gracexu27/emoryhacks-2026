@@ -98,6 +98,12 @@ export function availableChoices(state: GameState, scene: Scene): Choice[] {
   return scene.choices.filter((choice) => (choice.requiresPinned ?? []).every((id) => isPinned(state, id)))
 }
 
+// How many choices in this scene are still locked behind evidence the player hasn't pinned.
+// The UI shows that something is locked, never what it is.
+export function lockedChoiceCount(state: GameState, scene: Scene): number {
+  return scene.choices.length - availableChoices(state, scene).length
+}
+
 export function pickEnding(story: Story, flags: string[]): Ending {
   const ending = story.endings.find((e) => e.requiresFlags.every((flag) => flags.includes(flag)))
   if (!ending) throw new Error('No ending matched. Add a catch-all ending with empty requiresFlags.')

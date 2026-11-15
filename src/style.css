@@ -412,3 +412,28 @@ button:focus-visible, input:focus-visible { outline: 3px solid #fff0af; outline-
 .clock-chip.is-urgent { border-color: #ff6b7a; color: #ffd0d5; animation: clock-urgent 1s ease-in-out infinite; }
 @keyframes clock-urgent { 50% { box-shadow: 0 0 0 4px #ff6b7a66, 3px 3px 0 #09182b; } }
 @media (prefers-reduced-motion: reduce) { .town-map::before { transition: none; } .clock-chip.is-urgent { animation: none; } }
+
+/* ---- Evidence cards: scannable, highlighted, tactile ---- */
+.evidence-card { display: flex; gap: .7rem; padding: .7rem .8rem; border: 2px solid #3d5670; background: #1b2c45; box-shadow: 3px 3px 0 #050914; }
+.evidence-card.is-sponsored { border-color: #f7b572; background: #231d14; }
+.evidence-card.is-pinned { border-color: #69e1cc; }
+.evidence-tag { flex: none; display: grid; place-items: center; width: 44px; height: 34px; border: 2px solid; font: 700 .64rem monospace; letter-spacing: .04em; }
+.evidence-official .evidence-tag { border-color: #8fd18a; background: #17301f; color: #8fd18a; }
+.evidence-people .evidence-tag { border-color: #f2a6d4; background: #2e1a2a; color: #f2a6d4; }
+.evidence-places .evidence-tag, .evidence-web .evidence-tag { border-color: #f7b572; background: #3a2a14; color: #f7b572; }
+.evidence-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .25rem; }
+.evidence-body .badge-featured { align-self: flex-start; }
+.evidence-card h3 { margin: 0; font-size: 1rem; line-height: 1.3; color: #fff0d5; }
+.evidence-line { margin: 0; color: #d3dde2; font-size: .9rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.evidence-meta { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: .15rem; color: #9fb6bd; font-size: .78rem; }
+.evidence-meta .is-old { color: #ff8a80; font-weight: 700; }
+.evidence-card mark, .record-detail mark { padding: 0 2px; background: #f7b572; color: #1a1205; }
+.result-list { gap: .55rem; }
+/* Pin stamp: a little press when a card is pinned */
+.pin-button.is-stamped { animation: pin-stamp .28s ease-out; }
+@keyframes pin-stamp { 0% { transform: scale(1.35) rotate(-8deg); } 100% { transform: scale(1) rotate(0); } }
+@media (prefers-reduced-motion: reduce) { .pin-button.is-stamped { animation: none; } }
+/* Locked choice: visible, but never says what it is */
+.dialog-wrap .choice.choice-locked { border: 2px dashed #6a7590; background: #141c2c; box-shadow: none; color: #aab6c6; font-weight: 500; font-size: .84rem; cursor: default; transform: none; }
+.dialog-wrap .choice.choice-locked:hover { background: #141c2c; transform: none; box-shadow: none; }
+.choice-lock { flex: none; color: #8d98ad; }

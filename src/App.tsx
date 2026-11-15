@@ -9,6 +9,7 @@ import {
   getScene,
   initialState,
   isPinned,
+  lockedChoiceCount,
   parseClock,
   START_MINUTES,
   validateStory,
@@ -120,6 +121,7 @@ function App() {
             <SceneView
               scene={scene}
               choices={availableChoices(state, scene)}
+              lockedCount={lockedChoiceCount(state, scene)}
               onChoose={(choice) => { dispatch({ type: 'choose', choice }); setDialogOpen(true) }}
             />
           </div>
