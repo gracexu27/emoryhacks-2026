@@ -1,4 +1,4 @@
-import { formatDistance, RECENT_CUTOFF, type ArchiveHit, type ArchiveRecord } from '../lib/typesense'
+import { formatDistance, SOURCE_TYPE_LABELS, type ArchiveHit, type ArchiveRecord } from '../lib/typesense'
 
 export const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 
@@ -8,12 +8,11 @@ export function stripDistance({ distance_m: _distance, ...record }: ArchiveHit):
 }
 
 export function RecordBadges({ record }: { record: ArchiveHit }) {
-  const isOld = record.date < RECENT_CUTOFF
   return (
     <div className="badges">
       {record.is_sponsored && <span className="badge badge-featured">Featured</span>}
-      <span className={`badge badge-type badge-${record.source_type}`}>{record.source_type.replace('_', ' ')}</span>
-      <span className={`badge badge-date${isOld ? ' is-old' : ''}`}>{dateFormat.format(new Date(record.date * 1000))}</span>
+      <span className="badge badge-type">{SOURCE_TYPE_LABELS[record.source_type]}</span>
+      <span className="badge badge-date">{dateFormat.format(new Date(record.date * 1000))}</span>
       {record.distance_m !== undefined && <span className="badge badge-distance">{formatDistance(record.distance_m)}</span>}
     </div>
   )
@@ -22,11 +21,13 @@ export function RecordBadges({ record }: { record: ArchiveHit }) {
 type Props = {
   record: ArchiveHit
   pinned: boolean
+  compared: boolean
   onTogglePin: (record: ArchiveRecord) => void
+  onCompare: (record: ArchiveHit) => void
   onOpen: (record: ArchiveHit) => void
 }
 
-export function ResultCard({ record, pinned, onTogglePin, onOpen }: Props) {
+export function ResultCard({ record, pinned, compared, onTogglePin, onCompare, onOpen }: Props) {
   return (
     <article className={`result-card${record.is_sponsored ? ' is-sponsored' : ''}${pinned ? ' is-pinned' : ''}`}>
       <RecordBadges record={record} />
@@ -35,11 +36,15 @@ export function ResultCard({ record, pinned, onTogglePin, onOpen }: Props) {
         <button type="button" className="result-title" onClick={() => onOpen(record)}>{record.title}</button>
       </h3>
       <p>{record.excerpt}</p>
+      {record.domain && <p className="result-domain"><span>Web address</span> <code>{record.domain}</code></p>}
       <footer>
         <span>{record.source_name}</span>
-        <button type="button" className="pin-button" aria-pressed={pinned} onClick={() => onTogglePin(stripDistance(record))}>
-          {pinned ? 'Pinned' : 'Pin'}
-        </button>
+        <div className="result-actions">
+          <button type="button" className="compare-button" aria-pressed={compared} onClick={() => onCompare(record)}>{compared ? 'Comparing' : 'Compare'}</button>
+          <button type="button" className="pin-button" aria-pressed={pinned} onClick={() => onTogglePin(stripDistance(record))}>
+            {pinned ? 'Pinned' : 'Pin'}
+          </button>
+        </div>
       </footer>
     </article>
   )

@@ -15,6 +15,11 @@ type Props = {
   onArchive: () => void
   onPhone: () => void
   onPier: () => void
+  pierTravelActive: boolean
+  marketActive: boolean
+  onMarket: () => void
+  wifiActive: boolean
+  onWifi: () => void
   markers?: MapMarker[] // archive results shown on the town
   you?: ImagePoint | null // the player's position
   radiusMeters?: number | null // "Near me" radius around the player, when that filter is on
@@ -30,9 +35,11 @@ const HOTSPOTS = {
   archive: { x: 0.2, y: 0.58 },
   phone: { x: 0.5, y: 0.55 },
   pier: { x: 0.71, y: 0.3 },
+  market: { x: 0.6, y: 0.67 },
+  wifi: { x: 0.76, y: 0.7 },
 }
 
-export function PixelTownScene({ interactive, showLabels, onArchive, onPhone, onPier, markers = [], you, radiusMeters }: Props) {
+export function PixelTownScene({ interactive, showLabels, onArchive, onPhone, onPier, pierTravelActive, marketActive, onMarket, wifiActive, onWifi, markers = [], you, radiusMeters }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -100,9 +107,15 @@ export function PixelTownScene({ interactive, showLabels, onArchive, onPhone, on
         <button type="button" className="map-hotspot" style={at(HOTSPOTS.phone)} onClick={onPhone} aria-label="Open Ping's phone">
           <span className="map-hotspot-symbol">!</span>{showLabels && <span className="map-hotspot-label">Ping</span>}
         </button>
-        <button type="button" className="map-hotspot" style={at(HOTSPOTS.pier)} onClick={onPier} aria-label="Inspect ferry pier">
+        <button type="button" className="map-hotspot" style={at(HOTSPOTS.pier)} onClick={onPier} aria-label={pierTravelActive ? 'Head to North Pier, 15 minutes' : 'Inspect ferry pier'}>
           <span className="map-hotspot-symbol">◈</span>{showLabels && <span className="map-hotspot-label">Pier</span>}
         </button>
+        {marketActive && <button type="button" className="map-hotspot" style={at(HOTSPOTS.market)} onClick={onMarket} aria-label="Walk to Low Market, 10 minutes">
+          <span className="map-hotspot-symbol">♨</span>{showLabels && <span className="map-hotspot-label">Market</span>}
+        </button>}
+        {wifiActive && <button type="button" className="map-hotspot" style={at(HOTSPOTS.wifi)} onClick={onWifi} aria-label="Open nearby Wi-Fi networks">
+          <span className="map-hotspot-symbol">⌁</span>{showLabels && <span className="map-hotspot-label">Wi-Fi</span>}
+        </button>}
       </>}
     </div>
   )

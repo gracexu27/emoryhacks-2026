@@ -21,11 +21,13 @@ import { Notebook } from './components/Notebook'
 import { SceneView } from './components/SceneView'
 import { SearchPanel } from './components/SearchPanel'
 
-type Panel = 'archive' | 'notebook' | 'pause' | 'pier' | null
+type Panel = 'intro' | 'archive' | 'notebook' | 'pause' | 'pier' | null
 
 const story = storyData as unknown as Story
 const reducer = gameReducer(story)
-// Records are bundled only for the end-of-run debrief; gameplay finds them through search.
+const ferryDecisionScenes = new Set(['station-arrival', 'ferry-ticket-page', 'ferry-payment', 'ferry-page-closed', 'ferry-operator-page', 'ferry-operator-payment', 'ferry-operator-closed'])
+const dinnerListingScenes = new Set(['dinner-ping', 'dinner-calla-page'])
+// Bundled records supply the debrief and page attribution; archive discovery uses search.
 const records = new Map((recordsData as ArchiveRecord[]).map((record) => [record.id, record]))
 
 if (import.meta.env.DEV) {
@@ -87,7 +89,17 @@ function App() {
         showLabels={showLabels}
         onArchive={() => setPanel('archive')}
         onPhone={() => setDialogOpen(true)}
-        onPier={() => setPanel('pier')}
+        onPier={() => {
+          if (scene.id === 'encore-ping' || scene.id === 'encore-finished') {
+            dispatch({ type: 'choose', choice: { label: 'Head to North Pier', next: 'pier-arrival', timeCost: 15, ...(scene.id === 'encore-ping' ? { setsFlags: ['left_before_encore'] } : {}) } })
+            setDialogOpen(true)
+          } else setPanel('pier')
+        }}
+        pierTravelActive={scene.id === 'encore-ping' || scene.id === 'encore-finished'}
+        marketActive={dinnerListingScenes.has(scene.id)}
+        onMarket={() => { dispatch({ type: 'choose', choice: { label: 'Walk to Low Market', next: 'dinner-market-arrival', timeCost: 10 } }); setDialogOpen(true) }}
+        wifiActive={scene.id === 'wifi-ping'}
+        onWifi={() => { dispatch({ type: 'choose', choice: { label: 'Open nearby networks', next: 'wifi-network-list', timeCost: 0 } }); setDialogOpen(true) }}
         markers={started && !panel && !ending ? markers : []}
         you={state.location ? geoToImage(state.location) : null}
         radiusMeters={mapView?.nearMe ? NEAR_ME_RADIUS_KM * 1000 : null}
@@ -115,12 +127,17 @@ function App() {
 
       {started && !ending && !panel && (
         dialogOpen ? (
-          <div className="dialog-wrap">
+          <div className={`dialog-wrap${['ferry-ticket-page', 'ferry-payment', 'ferry-operator-page', 'ferry-operator-payment', 'dinner-calla-page', 'wifi-network-list', 'wifi-login-screen'].includes(scene.id) ? ' has-ticket-page' : ''}${scene.id === 'wifi-login-screen' ? ' has-network-login' : ''}`}>
             <div className="dialog-topline"><span className="location-mark" aria-hidden="true">✦</span><span>{state.place}</span><button type="button" onClick={() => setDialogOpen(false)} aria-label="Minimize dialogue">−</button></div>
             <SceneView
               scene={scene}
               choices={availableChoices(state, scene)}
               onChoose={(choice) => { dispatch({ type: 'choose', choice }); setDialogOpen(true) }}
+              onOpenArchive={() => { setSelectedRecord(null); setPanel('archive') }}
+              ticketListing={records.get(scene.id.startsWith('ferry-operator-') ? 'ferry-official-tickets' : 'ferry-sponsored-passes')}
+              dinnerListing={records.get('calla-listing')}
+              wifiListing={records.get('wifi-citynet-free-listing')}
+              publicWifiListing={records.get('wifi-city-locations')}
             />
           </div>
         ) : (
@@ -131,12 +148,9 @@ function App() {
       {!started && (
         <section className="title-screen" aria-labelledby="game-title">
           <div className="title-card">
-            <p className="title-kicker">LANTERN BAY · ONE NIGHT ONLY</p>
             <h1 id="game-title">A Guide to<br /><em>Getting Lost</em></h1>
-            <p className="title-subtitle">Ping means well. Check anyway.</p>
-            <button type="button" className="start-button" onClick={() => setStarted(true)}>Start exploring <span aria-hidden="true">→</span></button>
+            <button type="button" className="start-button" onClick={() => { setStarted(true); setPanel('intro') }}>Start exploring <span aria-hidden="true">→</span></button>
           </div>
-          <p className="title-footer">A coastal mystery about trust, timing, and finding your own way.</p>
         </section>
       )}
 
@@ -147,9 +161,15 @@ function App() {
       )}
 
       {started && <div className="overlay-backdrop" hidden={panel === null} onMouseDown={(event) => { if (event.target === event.currentTarget) setPanel(null) }}>
-        <section className={`game-window ${panel === 'archive' ? 'archive-window' : ''}`} role="dialog" aria-modal="true" aria-label={panel === 'archive' ? 'City archive' : panel === 'notebook' ? 'Notebook' : panel === 'pause' ? 'Pause and settings' : 'North Pier'}>
-          <div className="window-header"><span>{panel === 'archive' ? 'City archive' : panel === 'notebook' ? 'Notebook' : panel === 'pause' ? 'Paused' : 'North Pier'}</span><button type="button" onClick={() => setPanel(null)} aria-label="Close panel">×</button></div>
+        <section className={`game-window ${panel === 'archive' ? 'archive-window' : ''}`} role="dialog" aria-modal="true" aria-label={panel === 'intro' ? 'Before you begin' : panel === 'archive' ? 'City archive' : panel === 'notebook' ? 'Notebook' : panel === 'pause' ? 'Pause and settings' : 'North Pier'}>
+          <div className="window-header"><span>{panel === 'intro' ? 'Before you begin' : panel === 'archive' ? 'City archive' : panel === 'notebook' ? 'Notebook' : panel === 'pause' ? 'Paused' : 'North Pier'}</span><button type="button" onClick={() => setPanel(null)} aria-label="Close panel">×</button></div>
           <div className="window-content">
+            {panel === 'intro' && <div className="intro-panel">
+              <p className="intro-goal">Your plan: get dinner, see a concert, and catch the last ferry home.</p>
+              <p>Ping is the AI guide on your phone. It suggests places using town listings and notices. Search the town archive to check where its information came from.</p>
+              <p>Each search takes five minutes. Your choices follow you through the night.</p>
+              <button type="button" className="primary-button" onClick={() => setPanel(null)}>Begin the night</button>
+            </div>}
             <div hidden={panel !== 'archive'}>
               <SearchPanel
                 origin={state.location}
@@ -158,6 +178,21 @@ function App() {
                 onTogglePin={(record) => dispatch({ type: 'togglePin', record })}
                 selected={selectedRecord}
                 onSelect={setSelectedRecord}
+                onUseAddress={ferryDecisionScenes.has(scene.id) ? (record) => {
+                  const next = record.id === 'ferry-official-tickets' ? 'ferry-operator-page' : record.id === 'ferry-sponsored-passes' ? 'ferry-ticket-page' : null
+                  if (!next || !record.domain) return
+                  dispatch({ type: 'choose', choice: { label: `Open ${record.domain}`, next, timeCost: 0 } })
+                  setSelectedRecord(null)
+                  setPanel(null)
+                  setDialogOpen(true)
+                } : undefined}
+                onOpenListing={dinnerListingScenes.has(scene.id) ? (record) => {
+                  if (record.id !== 'calla-listing') return
+                  dispatch({ type: 'choose', choice: { label: 'Open Calla listing', next: 'dinner-calla-page', timeCost: 0 } })
+                  setSelectedRecord(null)
+                  setPanel(null)
+                  setDialogOpen(true)
+                } : undefined}
                 onShowOnMap={(hits, nearMe) => { setMapView({ hits, nearMe }); setPanel(null); setDialogOpen(false) }}
               />
             </div>

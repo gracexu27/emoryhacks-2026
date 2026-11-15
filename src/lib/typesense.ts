@@ -4,6 +4,7 @@ import settings from '../../content/settings.json'
 export type SourceType = 'official' | 'visitor' | 'news' | 'listing' | 'vendor' | 'domain_record'
 export type SourceGroup = 'official' | 'people' | 'places' | 'web'
 export type ResultGroup = 'official' | 'people' | 'places'
+export type ResultTab = 'all' | ResultGroup
 
 export type ArchiveRecord = {
   id: string
@@ -34,10 +35,18 @@ export type SearchFilters = {
   nearMe: boolean
 }
 
-export type GroupedResults = Record<ResultGroup, ArchiveHit[]>
+export type GroupedResults = Record<ResultTab, ArchiveHit[]>
 
 export const SOURCE_GROUPS: ResultGroup[] = ['official', 'people', 'places']
 export const SOURCE_TYPES: SourceType[] = ['official', 'visitor', 'news', 'listing', 'vendor', 'domain_record']
+export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
+  official: 'Town notice',
+  visitor: 'Visitor post',
+  news: 'News',
+  listing: 'Web listing',
+  vendor: 'Vendor post',
+  domain_record: 'Domain record',
+}
 
 // "Today" in the fictional city, and how far back counts as recent.
 export const GAME_TODAY = Math.floor(Date.parse(settings.gameToday) / 1000)
@@ -71,13 +80,13 @@ function getClient() {
   return client
 }
 
-function buildFilter(group: ResultGroup, filters: SearchFilters, origin: LatLng | null): string {
-  const groupFilter = group === 'places' ? 'source_group:=[places,web]' : `source_group:=${group}`
-  const parts = [groupFilter]
+function buildFilter(group: ResultGroup | null, filters: SearchFilters, origin: LatLng | null): string | undefined {
+  const groupFilter = group === 'places' ? 'source_group:=[places,web]' : group ? `source_group:=${group}` : null
+  const parts = groupFilter ? [groupFilter] : []
   if (filters.recentOnly) parts.push(`date:>=${RECENT_CUTOFF}`)
   if (filters.sourceTypes.length) parts.push(`source_type:=[${filters.sourceTypes.join(',')}]`)
   if (filters.nearMe && origin) parts.push(`location:(${origin[0]}, ${origin[1]}, ${NEAR_ME_RADIUS_KM} km)`)
-  return parts.join(' && ')
+  return parts.length ? parts.join(' && ') : undefined
 }
 
 // With a player location, always sort by distance too so every located hit gets a distance badge.
@@ -90,29 +99,30 @@ function buildSort(filters: SearchFilters, origin: LatLng | null): string | unde
 
 type RawHit = { document: ArchiveRecord; geo_distance_meters?: { location?: number } }
 
-// One request, three searches: one per result column.
+// One request returns a relevance-ranked mixed list and three optional source views.
 export async function multiSearchArchive(
   query: string,
   filters: SearchFilters,
   origin: LatLng | null,
 ): Promise<GroupedResults> {
   const response = await getClient().multiSearch.perform({
-    searches: SOURCE_GROUPS.map((group) => ({
+    searches: [null, ...SOURCE_GROUPS].map((group) => ({
       collection: 'archive',
       q: query,
-      query_by: 'title,excerpt,tags,source_name',
+      query_by: 'title,excerpt,tags,source_name,domain',
       filter_by: buildFilter(group, filters, origin),
       sort_by: buildSort(filters, origin),
       exclude_fields: 'embedding',
-      per_page: 10,
+      per_page: group ? 10 : 30,
     })),
   })
 
   const results = response.results as Array<{ hits?: RawHit[]; error?: string }>
-  const grouped = { official: [], people: [], places: [] } as GroupedResults
+  const grouped = { all: [], official: [], people: [], places: [] } as GroupedResults
   results.forEach((result, index) => {
     if (result.error) throw new Error(result.error)
-    grouped[SOURCE_GROUPS[index]] = (result.hits ?? []).map((hit) => {
+    const tab = index === 0 ? 'all' : SOURCE_GROUPS[index - 1]
+    grouped[tab] = (result.hits ?? []).map((hit) => {
       const distance = hit.geo_distance_meters?.location
       return distance === undefined || distance === NO_DISTANCE ? hit.document : { ...hit.document, distance_m: distance }
     })

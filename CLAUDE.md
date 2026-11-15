@@ -38,9 +38,11 @@ The player clicks objects in a pixel-art scene, reads their details in legible p
 
 - Vite + React + TypeScript and plain CSS. Do not add a UI framework without approval.
 - Local Typesense runs through Docker. `scripts/import.ts` recreates the `archive` collection and imports `content/records.json` on each run.
-- The app now has a grouped search UI, filters, date and source badges, archive results pinned on the town art, a clock, notebook, scene engine, and a basic ending. These are a walking skeleton, not a complete playthrough.
-- `content/scenes.json` has the full route (ferry → dinner → Wi-Fi → encore), four endings including missed-ferry, and the debrief; most narration is still `TODO-CONTENT`.
-- The opening ferry scene now has an original full-screen pixel map, title screen, on-map controls, and archive/notebook/pause overlays. Clicking a result title opens a record detail view in the archive window (all fields, pin button); Calla's “View page source” lives only there, never on search cards.
+- The app now opens archive searches in a mixed relevance-ranked list, with optional source views, filters, neutral source/date labels, two-record comparison, and archive results pinned on the town art. It has a clock, notebook, scene engine, and basic ending. These are a walking skeleton, not a complete playthrough.
+- `content/scenes.json` has playable ferry, dinner, Wi-Fi, concert, encore, and pier beats, four endings including missed-ferry, and the debrief.
+- The opening ferry scene now has an original full-screen pixel map, title screen, a brief rules card, and archive/notebook/pause overlays. Ping's ticket page shows its source and Featured status, with visible archive search, reversible checkout, and close-page actions. Opening either ferry ticket record in the archive offers its exact address as an in-game page; buying is a separate choice. Clicking a result title opens a record detail view in the archive window; Calla's “View page source” lives only there, never on search cards.
+- At the Low Market, Ping repeats the claim planted in Calla's listing. Players can inspect the listing and its page source, search market hours, or walk to the stalls by dialogue choice or map hotspot without a pin requirement. Calla dinner takes 40 minutes longer than Ama's noodles; the outcome flag is set only when the player books or orders.
+- In the Flats, Ping suggests CityNet Free when concert details fail to load. The player can open a nearby-network list from dialogue or a map marker, search the archive, connect to the network, and encounter a separate city-account sign-in decision. Connecting alone does not set the compromise flag. The city record lists CityNet_Public at the Seawall, not in the Flats, so the no-login route continues there before offering that network. No real credentials are requested.
 - **Deployed on Vultr** at `http://64.177.55.92` (Atlanta, Ubuntu 24.04, 1 vCPU / 2 GB). Custom domain + HTTPS still to do.
   - Typesense 30.2 runs in Docker bound to `127.0.0.1:8108` (not reachable from the internet). Its admin key lives only in `/root/typesense.env` on the server and in the local gitignored `.env.deploy`.
   - nginx serves `dist/` from `/var/www/lantern-bay` and proxies **only** `POST /typesense/multi_search` (rate-limited, 64 KB body cap) and `/typesense/health`; every other `/typesense/*` path returns 404. Strict CSP and security headers are set. UFW allows 22/80/443; SSH is key-only.
@@ -54,7 +56,7 @@ Existing:
 
 ```text
 content/records.json      # 13 authored archive records
-content/scenes.json       # full route skeleton (ferry → dinner → Wi-Fi → encore), endings, debrief; TODO-CONTENT text
+content/scenes.json       # ferry, dinner, Wi-Fi, concert, encore, pier, endings, debrief
 content/settings.json     # fictional day, near-me radius (250 m), map bounds = corners of the town art
 content/synonyms.json     # Typesense synonym set (ferry/boat, dinner/food/where to eat, wifi/internet, …)
 scripts/import.ts         # recreates archive, upserts the synonym set, imports records
@@ -75,10 +77,10 @@ Keep game logic as pure functions. Story content belongs in data files rather th
 The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. It also has faceted `source_type`, `source_group`, and `is_sponsored`; sortable Unix `date`; and optional `location` (geopoint). Records have stable human-readable IDs.
 
 - `source_type` in the authored data includes `official`, `visitor`, `listing`, `vendor`, and `domain_record`.
-- `source_group` in the authored data includes `official`, `web`, `places`, and `people`. The UI groups these as **Official**, **Web & places**, and **What people say**. Do not omit `web`, or the phishing evidence disappears from results.
+- `source_group` in the authored data includes `official`, `web`, `places`, and `people`. The default archive view mixes all sources by search relevance; optional views show **Town notices**, **Web & places**, and **Community posts**. Do not omit `web`, or the phishing evidence disappears from results.
 - `hidden_text` is stored on `calla-listing` for the “View page source” action. It must not appear on ordinary result cards.
 - `network_name` is stored on the two Wi-Fi records. The fake network is `CityNet Free`; the city-operated name is `CityNet_Public`.
-- Fictional ferry addresses are in record excerpts. The import schema has optional `domain` and `domain_registered` fields, but the authored data does not use them yet.
+- Fictional ferry addresses are in record excerpts and in `domain` on the two ticket records and domain record. The domain record also has `domain_registered`. Result cards and details show addresses without declaring them safe.
 - Several authored records have `location` coordinates placed on spots in the town art (station, noodle stall, bao cart, Calla's umbrellas, ticket booth, ferry gangway, lower docks = the Flats). `content/settings.json` map bounds are the art's corners, so `src/lib/townMap.ts` converts lat/lng to a position on the picture. "Show on town map" in the archive puts located results as pins on the scene (with the player's "You" marker and the near-me radius); clicking a pin reopens that record. To place something, pick a pixel (x, y) in the 1672×941 art: lat = north − y/941·(north−south), lng = west + x/1672·(east−west).
 - The importer can enable CLIP and Whisper models with `ENABLE_EXPERIMENTAL_MEDIA_SEARCH=1`; they are off by default. The current story has no image records, QR clue, or voice UI. Keep those features out of the critical path.
 - Show source and date on result cards; they are essential to the old-post and lookalike-site clues. Archive timestamps use UTC as the fictional night’s wall clock, matching the current date display. Show sponsored status as “Featured,” not as a trust signal.
@@ -87,15 +89,15 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 
 - `content/scenes.json` has `{ "start", "scenes", "endings", "debrief" }`. A choice has a `next` scene or `endsRun: true`, a `timeCost`, and may have `requiresPinned` and `setsFlags`. Ending order runs most-specific first, then a catch-all.
 - A scene may set `place` (HUD location name) and `location` (map coordinates); scenes without them keep the previous values.
-- The route is ferry → dinner → Wi-Fi → encore. Outcome flags: `avoided_phishing`/`fell_for_phishing`, `avoided_injection`/`fell_for_injection`, `avoided_evil_twin`/`fell_for_evil_twin`, `trusted_true_claim`/`doubted_true_claim`.
+- The route is ferry → dinner → Wi-Fi → concert → encore decision → North Pier. Outcome flags: `avoided_phishing`/`fell_for_phishing`, `avoided_injection`/`fell_for_injection`, `avoided_evil_twin`/`fell_for_evil_twin`, `stayed_for_encore`/`left_before_encore`.
 - `debrief` has one entry per claim: `title`, `claim` (Ping's words), `outcomes` (`flag`, `safe`, `text`; first matching flag wins) and `evidence` (record ids, shown with source and date, marked if the player pinned them).
 - In dev, the browser console warns about broken scene links, unknown record ids, and flags no choice sets.
 - The clock starts at 6:30 PM; the last ferry leaves at 10:45 PM. Each submitted archive search costs five in-game minutes (failed searches are free); scene choices can have their own time costs.
-- `deadline: { "time": "22:45", "flag": "missed_last_ferry" }` in `scenes.json`: after any search or choice that pushes the clock past it, the run ends with that flag set, so `ending-missed-ferry` (listed first) wins. On the best route the player can afford about 15 searches.
+- `deadline: { "time": "22:45", "flag": "missed_last_ferry" }` in `scenes.json`: after any search or choice that reaches or passes departure time, the run ends with that flag set, so `ending-missed-ferry` (listed first) wins. The concert takes 65 minutes, the encore takes 30, and walking to North Pier takes 15. Search time can determine whether staying for the encore leaves enough time for the ferry.
 - Time is visible: `App.tsx` sets `--night` (0 at 6:30 PM → 1 at the deadline) on `.game-root`; CSS dims, cools and tints the town art with it. The clock chip turns amber 45 min before the deadline (`is-late`) and pulses red in the last 15 (`is-urgent`).
 - A player can discover and pin the ferry timetable early, then use it at the show without another search.
 - Clicking a scene object can open a phone panel or record. Searching the archive finds related evidence. Do not reveal the verdict merely by clicking a hotspot.
-- Pins may unlock actions, but choices must name what the player actually sees or does, not disclose that a source is correct.
+- Pins may unlock actions in later beats, but the ferry choice comes from opening either ticket record and using its address. Pinning is optional there. Choices must name what the player actually sees or does, not disclose that a source is correct.
 - Endings answer whether the player heard the last song and made it home. The recap lists each claim, the player's action, and the evidence, without lecturing.
 - Fake ticket and login screens are in-game mockups. Do not collect real payment or account information.
 
@@ -117,8 +119,8 @@ The `archive` collection indexes `title`, `excerpt`, `tags`, and `source_name`. 
 
 1. **Scaffold and Typesense pipeline:** done.
 2. **Search UI and walking skeleton:** grouped search, basic source disclosure, clock, notebook, map, and placeholder scenes exist; the story route is incomplete.
-3. **First playable ferry beat (next):** Ping's link, archive evidence, neutral choice, clock, pinning, and a consequence.
-4. **Full route:** dinner, Wi-Fi, true ferry-time claim, endings, and recap.
+3. **First playable ferry beat:** Ping's link, archive evidence, neutral choice, clock, and a consequence are in place. The opening teaches archive use and makes payment a separate decision.
+4. **Full route:** ferry, dinner, Wi-Fi, concert, encore decision, pier ticket check, four endings, and recap are playable. The true ferry-time claim is assessed separately from the three attacks.
 5. **Polish and deploy:** the first full-screen art pass and responsive layout exist; sound, error states, Vultr build, custom domain, and demo video remain.
 
 ## How I want you to work

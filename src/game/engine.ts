@@ -110,10 +110,10 @@ export function parseClock(time: string): number {
   return h * 60 + m
 }
 
-// If the clock has passed the story's deadline, set the deadline flag and end the run.
+// At the ferry's departure time, boarding is over. Set the deadline flag and end the run.
 // Runs after every search and choice, so it overrides an ending reached too late.
 export function applyDeadline(state: GameState, story: Story): GameState {
-  if (!story.deadline || state.minutes <= parseClock(story.deadline.time)) return state
+  if (!story.deadline || state.minutes < parseClock(story.deadline.time)) return state
   const flags = [...new Set([...state.flags, story.deadline.flag])]
   return { ...state, flags, endingId: pickEnding(story, flags).id }
 }

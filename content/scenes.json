@@ -4,7 +4,7 @@
     {
       "id": "station-arrival",
       "place": "Upper Station",
-      "text": "You arrive at Upper Station. You have dinner to find, a show to catch, and the last ferry home.",
+      "text": "The train doors close behind you. Across the rain-dark harbor, a ferry waits at North Pier. You have dinner to find, a concert to see, and the last ferry home.",
       "guide": "Lantern Night passes are going fast. I found a page where you can get your return ticket now.",
       "location": [37.000003, -150.000007],
       "choices": [
@@ -18,119 +18,223 @@
       "guide": "",
       "choices": [
         {
-          "label": "Enter payment details at lanternbay-ferry.example",
+          "label": "Continue to payment",
+          "next": "ferry-payment",
+          "timeCost": 0
+        },
+        {
+          "label": "Close page",
+          "next": "ferry-page-closed",
+          "timeCost": 0
+        }
+      ]
+    },
+    {
+      "id": "ferry-operator-page",
+      "place": "Upper Station",
+      "text": "A ticket page opens at ferry.lanternbay.example. It offers a Lantern Night return pass.",
+      "guide": "",
+      "choices": [
+        { "label": "Continue to payment", "next": "ferry-operator-payment", "timeCost": 0 },
+        { "label": "Close page", "next": "ferry-operator-closed", "timeCost": 0 }
+      ]
+    },
+    {
+      "id": "ferry-operator-payment",
+      "place": "Upper Station",
+      "text": "The checkout is at ferry.lanternbay.example. It is ready to confirm your return pass.",
+      "guide": "",
+      "choices": [
+        {
+          "label": "Confirm payment at ferry.lanternbay.example",
+          "next": "ferry-after-official",
+          "timeCost": 10,
+          "setsFlags": ["avoided_phishing"]
+        },
+        { "label": "Back to ticket page", "next": "ferry-operator-page", "timeCost": 0 }
+      ]
+    },
+    {
+      "id": "ferry-operator-closed",
+      "place": "Upper Station",
+      "text": "You close the page. Your return ticket is still unsettled.",
+      "guide": "",
+      "choices": [
+        { "label": "Reopen ferry.lanternbay.example", "next": "ferry-operator-page", "timeCost": 0 }
+      ]
+    },
+    {
+      "id": "ferry-payment",
+      "place": "Upper Station",
+      "text": "The checkout is at lanternbay-ferry.example. It is ready to confirm your return pass.",
+      "guide": "",
+      "choices": [
+        {
+          "label": "Confirm payment at lanternbay-ferry.example",
           "next": "ferry-after-lookalike",
           "timeCost": 10,
           "setsFlags": ["fell_for_phishing"]
         },
         {
-          "label": "Open ferry.lanternbay.example from the pinned notice",
-          "next": "ferry-after-official",
-          "timeCost": 10,
-          "requiresPinned": ["ferry-official-tickets"],
-          "setsFlags": ["avoided_phishing"]
+          "label": "Back to ticket page",
+          "next": "ferry-ticket-page",
+          "timeCost": 0
         }
+      ]
+    },
+    {
+      "id": "ferry-page-closed",
+      "place": "Upper Station",
+      "text": "You close the page. Your return ticket is still unsettled.",
+      "guide": "",
+      "choices": [
+        { "label": "Reopen Ping’s ticket page", "next": "ferry-ticket-page", "timeCost": 0 }
       ]
     },
     {
       "id": "ferry-after-lookalike",
       "place": "Upper Station",
-      "text": "TODO-CONTENT What happens right after paying on lanternbay-ferry.example (e.g. a confirmation number that looks normal for now).",
-      "guide": "TODO-CONTENT Ping's reaction (optional).",
+      "text": "The page gives you a confirmation number. Ping marks your return ticket as handled.",
+      "guide": "",
       "choices": [
-        { "label": "TODO-CONTENT Head toward the Low Market", "next": "dinner-ping", "timeCost": 15 }
+        { "label": "Head toward the Low Market", "next": "dinner-ping", "timeCost": 15 }
       ]
     },
     {
       "id": "ferry-after-official",
       "place": "Upper Station",
-      "text": "TODO-CONTENT What happens after buying on ferry.lanternbay.example.",
-      "guide": "TODO-CONTENT Ping's reaction (optional).",
+      "text": "A return ticket appears from Lantern Bay Ferry. Ping marks your ticket as handled.",
+      "guide": "",
       "choices": [
-        { "label": "TODO-CONTENT Head toward the Low Market", "next": "dinner-ping", "timeCost": 15 }
+        { "label": "Head toward the Low Market", "next": "dinner-ping", "timeCost": 15 }
       ]
     },
 
     {
       "id": "dinner-ping",
       "place": "Low Market steps",
-      "text": "TODO-CONTENT Narration: getting hungry near the Low Market steps.",
-      "guide": "TODO-CONTENT Ping says the Low Market is closed tonight and recommends Calla's 7:15 PM table.",
+      "text": "You reach the steps above the Low Market. Rain blurs the signs below, and you are ready for dinner.",
+      "guide": "Heads up, the Low Market's closed tonight. Calla's five minutes away and has a table at 7:15.",
       "location": [36.99793, -150.001304],
       "choices": [
         {
-          "label": "TODO-CONTENT Book Calla’s 7:15 table",
-          "next": "dinner-at-calla",
-          "timeCost": 15,
-          "setsFlags": ["fell_for_injection"]
+          "label": "Open Calla's listing",
+          "next": "dinner-calla-page",
+          "timeCost": 0
         },
         {
-          "label": "TODO-CONTENT Walk down to the Low Market",
-          "next": "dinner-at-market",
-          "timeCost": 15,
-          "requiresPinned": ["market-lantern-night-hours"],
-          "setsFlags": ["avoided_injection"]
+          "label": "Walk down to the Low Market",
+          "next": "dinner-market-arrival",
+          "timeCost": 10
         }
+      ]
+    },
+    {
+      "id": "dinner-calla-page",
+      "text": "Calla's listing opens on your phone. It advertises a table at 7:15 PM.",
+      "guide": "",
+      "choices": [
+        { "label": "Book at Calla", "next": "dinner-at-calla", "timeCost": 15, "setsFlags": ["fell_for_injection"] },
+        { "label": "Close listing", "next": "dinner-ping", "timeCost": 0 }
+      ]
+    },
+    {
+      "id": "dinner-market-arrival",
+      "place": "Low Market",
+      "text": "The stalls are lit. Ama is ladling noodles into bowls. 'You're the fourth person tonight whose phone said we're closed,' she says.",
+      "guide": "",
+      "location": [36.99987, -150.00147],
+      "choices": [
+        { "label": "Order noodles from Ama", "next": "dinner-at-market", "timeCost": 5, "setsFlags": ["avoided_injection"] },
+        { "label": "Return to the steps", "next": "dinner-ping", "timeCost": 10 }
       ]
     },
     {
       "id": "dinner-at-calla",
       "place": "Calla",
-      "text": "TODO-CONTENT Dinner at Calla.",
+      "text": "Calla finds you a table. The meal is good, but service moves slowly and the bill is higher than you expected.",
       "guide": "",
       "location": [37.000082, -149.998843],
       "choices": [
-        { "label": "TODO-CONTENT Head to the Flats", "next": "wifi-ping", "timeCost": 45 }
+        { "label": "Finish dinner and head to the Flats", "next": "wifi-ping", "timeCost": 105 }
       ]
     },
     {
       "id": "dinner-at-market",
       "place": "Low Market",
-      "text": "TODO-CONTENT Dinner at the Low Market (the vendor from market-ama-open could appear here).",
+      "text": "Ama slides a hot bowl across the counter. The market is still busy under the lanterns.",
       "guide": "",
       "location": [36.99987, -150.00147],
       "choices": [
-        { "label": "TODO-CONTENT Head to the Flats", "next": "wifi-ping", "timeCost": 45 }
+        { "label": "Finish dinner and head to the Flats", "next": "wifi-ping", "timeCost": 65 }
       ]
     },
 
     {
       "id": "wifi-ping",
       "place": "The Flats",
-      "text": "TODO-CONTENT Narration: show details won't load on your phone.",
-      "guide": "TODO-CONTENT Ping suggests connecting to CityNet Free.",
+      "text": "In the Flats, your phone can't load the concert details. You know the show is at the Seawall, but you want to check the start time.",
+      "guide": "Your show details aren't loading. CityNet Free near the Flats should help.",
       "location": [36.998754, -149.997114],
       "choices": [
         {
-          "label": "TODO-CONTENT Connect to CityNet Free",
+          "label": "Open nearby networks",
+          "next": "wifi-network-list",
+          "timeCost": 0
+        },
+        {
+          "label": "Head to the Seawall",
+          "next": "wifi-seawall",
+          "timeCost": 15,
+          "setsFlags": ["avoided_evil_twin"]
+        }
+      ]
+    },
+    {
+      "id": "wifi-network-list",
+      "place": "The Flats",
+      "text": "At the Flats, CityNet Free is in range. CityNet_Public, saved on your phone, has no signal here.",
+      "guide": "",
+      "choices": [
+        {
+          "label": "Connect to CityNet Free",
           "next": "wifi-login-screen",
           "timeCost": 5
         },
         {
-          "label": "TODO-CONTENT Connect to CityNet_Public",
-          "next": "wifi-after-public",
-          "timeCost": 5,
-          "requiresPinned": ["wifi-city-locations"],
+          "label": "Go to the Seawall and check networks",
+          "next": "wifi-seawall",
+          "timeCost": 15,
           "setsFlags": ["avoided_evil_twin"]
+        },
+        {
+          "label": "Close network list",
+          "next": "wifi-ping",
+          "timeCost": 0
         }
       ]
     },
     {
       "id": "wifi-login-screen",
       "place": "The Flats",
-      "text": "TODO-CONTENT CityNet Free shows a login screen asking for your city account.",
+      "text": "The connection opens a sign-in page. It asks for your city-account login before you can use the network.",
       "guide": "",
       "choices": [
         {
-          "label": "TODO-CONTENT Enter your city-account login",
+          "label": "Enter city-account login",
           "next": "wifi-after-login",
           "timeCost": 5,
           "setsFlags": ["fell_for_evil_twin"]
         },
         {
-          "label": "TODO-CONTENT Close the login screen",
-          "next": "wifi-after-public",
-          "timeCost": 5,
+          "label": "Close sign-in page",
+          "next": "wifi-network-list",
+          "timeCost": 0
+        },
+        {
+          "label": "Leave the network and head to the Seawall",
+          "next": "wifi-seawall",
+          "timeCost": 15,
           "setsFlags": ["avoided_evil_twin"]
         }
       ]
@@ -138,41 +242,80 @@
     {
       "id": "wifi-after-login",
       "place": "The Flats",
-      "text": "TODO-CONTENT What happens after entering the login.",
+      "text": "The page spins, but your show details still don't load. You leave the network and keep moving.",
       "guide": "",
       "choices": [
-        { "label": "TODO-CONTENT Head to the Seawall for the show", "next": "encore-ping", "timeCost": 60 }
+        { "label": "Head to the Seawall and watch the concert", "next": "encore-ping", "timeCost": 80 }
+      ]
+    },
+    {
+      "id": "wifi-seawall",
+      "place": "The Seawall",
+      "text": "At the Seawall, the venue sign confirms the concert is here. Your phone now finds CityNet_Public; CityNet Free is out of range.",
+      "guide": "",
+      "location": [36.998249, -149.999042],
+      "choices": [
+        { "label": "Connect to CityNet_Public", "next": "wifi-after-public", "timeCost": 0 },
+        { "label": "Keep phone offline", "next": "wifi-after-offline", "timeCost": 0 }
       ]
     },
     {
       "id": "wifi-after-public",
-      "place": "The Flats",
-      "text": "TODO-CONTENT Show details load / the player moves on without signing in.",
+      "place": "The Seawall",
+      "text": "The show details load. The band is about to start.",
       "guide": "",
       "choices": [
-        { "label": "TODO-CONTENT Head to the Seawall for the show", "next": "encore-ping", "timeCost": 60 }
+        { "label": "Watch the concert", "next": "encore-ping", "timeCost": 65 }
+      ]
+    },
+    {
+      "id": "wifi-after-offline",
+      "place": "The Seawall",
+      "text": "You find the stage from the venue sign and the crowd. Your phone can wait.",
+      "guide": "",
+      "choices": [
+        { "label": "Watch the concert", "next": "encore-ping", "timeCost": 65 }
       ]
     },
 
     {
       "id": "encore-ping",
       "place": "The Seawall",
-      "text": "TODO-CONTENT Narration: Small Hours finishes their set; the crowd calls for an encore.",
-      "guide": "TODO-CONTENT Ping says the last ferry is at 10:45 PM and there is time for the encore.",
+      "text": "Small Hours finishes its set. The crowd calls for one more song as the ferry lights move across the harbor.",
+      "guide": "The last ferry leaves North Pier at 10:45 PM.",
       "location": [36.998249, -149.999042],
       "choices": [
         {
-          "label": "TODO-CONTENT Stay for the encore",
-          "endsRun": true,
+          "label": "Stay for the encore",
+          "next": "encore-finished",
           "timeCost": 30,
-          "setsFlags": ["trusted_true_claim"]
+          "setsFlags": ["stayed_for_encore"]
         },
         {
-          "label": "TODO-CONTENT Leave now for North Pier",
-          "endsRun": true,
+          "label": "Leave now for North Pier",
+          "next": "pier-arrival",
           "timeCost": 15,
-          "setsFlags": ["doubted_true_claim"]
+          "setsFlags": ["left_before_encore"]
         }
+      ]
+    },
+    {
+      "id": "encore-finished",
+      "place": "The Seawall",
+      "text": "The band plays one last song. When the lights come up, the crowd begins to disperse.",
+      "guide": "",
+      "choices": [
+        { "label": "Head to North Pier", "next": "pier-arrival", "timeCost": 15 }
+      ]
+    },
+    {
+      "id": "pier-arrival",
+      "place": "North Pier",
+      "text": "You reach the ferry terminal. A ticket checker asks for your pass.",
+      "guide": "",
+      "location": [37.000375, -149.996715],
+      "choices": [
+        { "label": "Present your ticket", "endsRun": true, "timeCost": 0 }
       ]
     }
   ],
@@ -182,26 +325,26 @@
   "endings": [
     {
       "id": "ending-missed-ferry",
-      "title": "TODO-CONTENT Missed the last ferry",
-      "text": "TODO-CONTENT The clock passed 10:45 PM before you reached North Pier.",
+      "title": "Missed the last ferry",
+      "text": "The 10:45 ferry has left before you can board. The harbor is quiet now.",
       "requiresFlags": ["missed_last_ferry"]
     },
     {
+      "id": "ending-ticket-trouble",
+      "title": "Ticket trouble at North Pier",
+      "text": "Your confirmation number isn't in Lantern Bay Ferry's system. The checker turns you away from the boarding line.",
+      "requiresFlags": ["fell_for_phishing"]
+    },
+    {
       "id": "ending-last-song-home",
-      "title": "TODO-CONTENT Heard the last song and made it home",
-      "text": "TODO-CONTENT Stayed for the encore, valid ticket, caught the 10:45.",
-      "requiresFlags": ["trusted_true_claim", "avoided_phishing"]
+      "title": "Heard the last song and made it home",
+      "text": "You hear the encore, reach North Pier with a valid pass, and catch the 10:45 ferry home.",
+      "requiresFlags": ["stayed_for_encore", "avoided_phishing"]
     },
     {
       "id": "ending-left-early",
-      "title": "TODO-CONTENT Made it home, missed the last song",
-      "text": "TODO-CONTENT Left before the encore.",
-      "requiresFlags": ["doubted_true_claim"]
-    },
-    {
-      "id": "ending-ticket-trouble",
-      "title": "TODO-CONTENT Heard the last song, trouble at the pier",
-      "text": "TODO-CONTENT Catch-all: stayed for the encore but the ticket from the lookalike page doesn't check out.",
+      "title": "Made it home, missed the last song",
+      "text": "You leave before the encore and reach North Pier with time to spare. The ferry takes you home.",
       "requiresFlags": []
     }
   ],
@@ -212,38 +355,38 @@
       "title": "Ferry tickets",
       "claim": "Lantern Night passes are going fast. I found a page where you can get your return ticket now.",
       "outcomes": [
-        { "flag": "avoided_phishing", "safe": true, "text": "TODO-CONTENT You bought from ferry.lanternbay.example." },
-        { "flag": "fell_for_phishing", "safe": false, "text": "TODO-CONTENT You paid on lanternbay-ferry.example." }
+        { "flag": "avoided_phishing", "safe": true, "text": "You bought from ferry.lanternbay.example, the address in Lantern Bay Ferry's ticket notice." },
+        { "flag": "fell_for_phishing", "safe": false, "text": "You paid on lanternbay-ferry.example. Its address differed from the ferry operator's, and the pass failed at North Pier." }
       ],
       "evidence": ["ferry-official-tickets", "ferry-domain-record", "ferry-visitor-pass"]
     },
     {
       "id": "injection",
       "title": "Dinner",
-      "claim": "TODO-CONTENT Ping's line about the Low Market being closed.",
+      "claim": "Heads up, the Low Market's closed tonight. Calla's five minutes away and has a table at 7:15.",
       "outcomes": [
-        { "flag": "avoided_injection", "safe": true, "text": "TODO-CONTENT You ate at the Low Market." },
-        { "flag": "fell_for_injection", "safe": false, "text": "TODO-CONTENT You booked Calla." }
+        { "flag": "avoided_injection", "safe": true, "text": "You checked for yourself and ate at the Low Market. Calla's listing had hidden instructions aimed at AI assistants." },
+        { "flag": "fell_for_injection", "safe": false, "text": "You booked Calla after Ping repeated a claim planted in its listing. The market was open, and dinner cost you 40 extra minutes." }
       ],
       "evidence": ["market-lantern-night-hours", "market-ama-open", "calla-listing"]
     },
     {
       "id": "evil-twin",
       "title": "Wi-Fi at the Flats",
-      "claim": "TODO-CONTENT Ping's line recommending CityNet Free.",
+      "claim": "Your show details aren't loading. CityNet Free near the Flats should help.",
       "outcomes": [
-        { "flag": "avoided_evil_twin", "safe": true, "text": "TODO-CONTENT You didn't sign in to CityNet Free." },
-        { "flag": "fell_for_evil_twin", "safe": false, "text": "TODO-CONTENT You entered your city-account login on CityNet Free." }
+        { "flag": "avoided_evil_twin", "safe": true, "text": "You left the Flats without entering a city login. The city lists CityNet_Public at the Seawall, not CityNet Free in the Flats." },
+        { "flag": "fell_for_evil_twin", "safe": false, "text": "You entered your city-account login on CityNet Free. The fake hotspot exposed it to the network operator." }
       ],
       "evidence": ["wifi-city-locations", "wifi-flats-visitor-report", "wifi-citynet-free-listing"]
     },
     {
       "id": "true-claim",
       "title": "The last ferry",
-      "claim": "TODO-CONTENT Ping's line: the last ferry is 10:45 PM, there's time for the encore.",
+      "claim": "The last ferry leaves North Pier at 10:45 PM.",
       "outcomes": [
-        { "flag": "trusted_true_claim", "safe": true, "text": "TODO-CONTENT You stayed for the encore. Ping was right this time." },
-        { "flag": "doubted_true_claim", "safe": false, "text": "TODO-CONTENT You left early because of an old post." }
+        { "flag": "stayed_for_encore", "safe": true, "text": "You stayed for the last song. Ping's 10:45 time was accurate; whether you caught the ferry depended on the clock and your ticket." },
+        { "flag": "left_before_encore", "safe": true, "text": "You left before the encore. Ping's departure time was accurate; the post saying the last ferry left at 10 was from the previous year's weekday service." }
       ],
       "evidence": ["ferry-lantern-night-timetable", "ferry-festival-service", "ferry-old-visitor-post"]
     }

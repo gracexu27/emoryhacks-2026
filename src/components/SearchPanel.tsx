@@ -4,32 +4,26 @@ import {
   NEAR_ME_RADIUS_KM,
   searchIsConfigured,
   SOURCE_GROUPS,
+  SOURCE_TYPE_LABELS,
   SOURCE_TYPES,
   type ArchiveHit,
   type ArchiveRecord,
   type GroupedResults,
   type LatLng,
   type SearchFilters,
-  type ResultGroup,
+  type ResultTab,
   type SourceType,
 } from '../lib/typesense'
 import { RecordDetail } from './RecordDetail'
-import { ResultCard } from './ResultCard'
+import { dateFormat, ResultCard } from './ResultCard'
 
-const COLUMN_TITLES: Record<ResultGroup, string> = {
-  official: 'Official',
-  people: 'What people say',
+const TAB_TITLES: Record<ResultTab, string> = {
+  all: 'All results',
+  official: 'Town notices',
+  people: 'Community posts',
   places: 'Web & places',
 }
-
-const TYPE_LABELS: Record<SourceType, string> = {
-  official: 'Official',
-  visitor: 'Visitor',
-  news: 'News',
-  listing: 'Listing',
-  vendor: 'Vendor',
-  domain_record: 'Domain record',
-}
+const TABS: ResultTab[] = ['all', ...SOURCE_GROUPS]
 // Only offer chips for source types the archive actually uses.
 const FILTER_TYPES = SOURCE_TYPES.filter((type) => type !== 'news')
 
@@ -40,17 +34,20 @@ type Props = {
   onTogglePin: (record: ArchiveRecord) => void
   selected: ArchiveHit | null // record open in the detail view (owned by App so map pins can open it)
   onSelect: (record: ArchiveHit | null) => void
+  onUseAddress?: (record: ArchiveHit) => void
+  onOpenListing?: (record: ArchiveHit) => void
   onShowOnMap: (hits: ArchiveHit[], nearMe: boolean) => void
 }
 
-export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected, onSelect: setSelected, onShowOnMap }: Props) {
+export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected, onSelect: setSelected, onUseAddress, onOpenListing, onShowOnMap }: Props) {
   const [query, setQuery] = useState('')
   const [filters, setFilters] = useState<SearchFilters>({ recentOnly: false, sourceTypes: [], nearMe: false })
   const [results, setResults] = useState<GroupedResults | null>(null)
   const [lastQuery, setLastQuery] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [tab, setTab] = useState<ResultGroup>('official')
+  const [tab, setTab] = useState<ResultTab>('all')
+  const [compareIds, setCompareIds] = useState<string[]>([])
 
   // Returns true if the search succeeded.
   async function runSearch(q: string, nextFilters: SearchFilters): Promise<boolean> {
@@ -60,8 +57,8 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected,
     try {
       const next = await multiSearchArchive(q, nextFilters, origin)
       setResults(next)
-      // Stay on the current tab if it has results; otherwise jump to the first tab that does.
-      setTab((current) => next[current].length ? current : SOURCE_GROUPS.find((g) => next[g].length) ?? current)
+      setTab('all')
+      setCompareIds((ids) => ids.filter((id) => next.all.some((hit) => hit.id === id)))
       setSelected(null)
       setLastQuery(q)
       return true
@@ -95,6 +92,12 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected,
     updateFilters({ ...filters, sourceTypes })
   }
 
+  function toggleCompare(record: ArchiveHit) {
+    setCompareIds((ids) => ids.includes(record.id)
+      ? ids.filter((id) => id !== record.id)
+      : [...ids.slice(-1), record.id])
+  }
+
   // When the player moves, refresh distances for the current results (free).
   useEffect(() => {
     runSearch(lastQuery, filters)
@@ -102,8 +105,9 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected,
   }, [origin?.[0], origin?.[1]])
 
   const configured = searchIsConfigured()
-  const allHits = results ? SOURCE_GROUPS.flatMap((group) => results[group]) : []
+  const allHits = results?.all ?? []
   const locatedHits = allHits.filter((hit) => hit.location)
+  const compared = compareIds.flatMap((id) => allHits.find((hit) => hit.id === id) ?? [])
 
   return (
     <section id="town-archive" className="search-panel">
@@ -154,7 +158,7 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected,
               aria-pressed={filters.sourceTypes.includes(type)}
               onClick={() => toggleType(type)}
             >
-              {TYPE_LABELS[type]}
+              {SOURCE_TYPE_LABELS[type]}
             </button>
           ))}
         </div>
@@ -179,6 +183,10 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected,
         <RecordDetail
           record={selected}
           pinned={isPinned(selected.id)}
+          compared={compareIds.includes(selected.id)}
+          onCompare={toggleCompare}
+          onUseAddress={selected.domain && ['ferry-sponsored-passes', 'ferry-official-tickets'].includes(selected.id) ? onUseAddress : undefined}
+          onOpenListing={selected.id === 'calla-listing' ? onOpenListing : undefined}
           onTogglePin={onTogglePin}
           onBack={() => setSelected(null)}
         />
@@ -198,9 +206,9 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected,
 
       {!selected && results && allHits.length > 0 && (
         <div className="results">
-          {/* One multi-search request fills all three tabs at once. */}
+          {/* One multi-search request returns a mixed ranking plus optional source views. */}
           <div className="result-tabs" role="tablist" aria-label="Kinds of sources">
-            {SOURCE_GROUPS.map((group) => (
+            {TABS.map((group) => (
               <button
                 key={group}
                 type="button"
@@ -211,21 +219,39 @@ export function SearchPanel({ origin, onSearch, isPinned, onTogglePin, selected,
                 className={`result-tab${tab === group ? ' is-active' : ''}`}
                 onClick={() => setTab(group)}
               >
-                {COLUMN_TITLES[group]} <span className="count">{results[group].length}</span>
+                {TAB_TITLES[group]} <span className="count">{results[group].length}</span>
               </button>
             ))}
           </div>
-          <p className="results-note">One search, three kinds of sources. Compare them before you decide.</p>
+          <p className="results-note">Compare publishers, addresses, and dates before you decide.</p>
+          {compareIds.length > 0 && (
+            <section className="compare-panel" aria-label="Compare sources">
+              <div className="compare-heading"><h2>Compare sources</h2><button type="button" className="link-button" onClick={() => setCompareIds([])}>Clear</button></div>
+              <div className="compare-grid">
+                {compared.map((record) => (
+                  <div key={record.id} className="compare-record">
+                    <strong>{record.title}</strong>
+                    <span>{record.source_name} · {SOURCE_TYPE_LABELS[record.source_type]}</span>
+                    {record.domain && <code>{record.domain}</code>}
+                    <span>{dateFormat.format(new Date(record.date * 1000))}{record.is_sponsored ? ' · Featured' : ''}</span>
+                  </div>
+                ))}
+                {compared.length === 1 && <div className="compare-empty">Choose one more result to compare.</div>}
+              </div>
+            </section>
+          )}
           <div id="result-tabpanel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="result-list">
             {results[tab].length === 0 ? (
-              <p className="empty">Nothing from {COLUMN_TITLES[tab].toLowerCase()} for “{lastQuery}”.</p>
+              <p className="empty">Nothing from {TAB_TITLES[tab].toLowerCase()} for “{lastQuery}”.</p>
             ) : (
               results[tab].map((record) => (
                 <ResultCard
                   key={record.id}
                   record={record}
                   pinned={isPinned(record.id)}
+                  compared={compareIds.includes(record.id)}
                   onTogglePin={onTogglePin}
+                  onCompare={toggleCompare}
                   onOpen={setSelected}
                 />
               ))

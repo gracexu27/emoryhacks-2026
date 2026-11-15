@@ -5,12 +5,16 @@ import { dateFormat, RecordBadges, stripDistance } from './ResultCard'
 type Props = {
   record: ArchiveHit
   pinned: boolean
+  compared: boolean
   onTogglePin: (record: ArchiveRecord) => void
+  onCompare: (record: ArchiveHit) => void
+  onUseAddress?: (record: ArchiveHit) => void
+  onOpenListing?: (record: ArchiveHit) => void
   onBack: () => void
 }
 
 // Full view of one archive record. Hidden page text (prompt injection) is only reachable from here.
-export function RecordDetail({ record, pinned, onTogglePin, onBack }: Props) {
+export function RecordDetail({ record, pinned, compared, onTogglePin, onCompare, onUseAddress, onOpenListing, onBack }: Props) {
   const [showSource, setShowSource] = useState(false)
 
   return (
@@ -27,7 +31,8 @@ export function RecordDetail({ record, pinned, onTogglePin, onBack }: Props) {
         {record.domain && <><dt>Web address</dt><dd>{record.domain}</dd></>}
         {record.domain_registered && <><dt>Domain registered</dt><dd>{dateFormat.format(new Date(record.domain_registered * 1000))}</dd></>}
         {record.network_name && <><dt>Wi-Fi network</dt><dd>{record.network_name}</dd></>}
-        {record.distance_m !== undefined && <><dt>Distance</dt><dd>{formatDistance(record.distance_m)} from you</dd></>}      </dl>
+        {record.distance_m !== undefined && <><dt>Distance</dt><dd>{formatDistance(record.distance_m)} from you</dd></>}
+      </dl>
 
       {record.hidden_text && (
         <div className="source-detail">
@@ -39,6 +44,9 @@ export function RecordDetail({ record, pinned, onTogglePin, onBack }: Props) {
       )}
 
       <div className="record-actions">
+        {onUseAddress && <button type="button" className="primary-button" onClick={() => onUseAddress(record)}>Open this address</button>}
+        {onOpenListing && <button type="button" className="primary-button" onClick={() => onOpenListing(record)}>Open this listing</button>}
+        <button type="button" className="compare-button" aria-pressed={compared} onClick={() => onCompare(record)}>{compared ? 'Remove from comparison' : 'Compare this source'}</button>
         <button type="button" className="pin-button" aria-pressed={pinned} onClick={() => onTogglePin(stripDistance(record))}>
           {pinned ? 'Pinned to notebook' : 'Pin to notebook'}
         </button>

@@ -149,6 +149,7 @@
       "North Pier"
     ],
     "source_name": "Lantern Bay Ferry Passes",
+    "domain": "lanternbay-ferry.example",
     "source_type": "listing",
     "source_group": "web",
     "date": 1794672000,
@@ -156,8 +157,8 @@
   },
   {
     "id": "ferry-official-tickets",
-    "title": "Where to buy ferry tickets",
-    "excerpt": "Buy tickets at the North Pier window or through ferry.lanternbay.example. These are our only ticket options.",
+    "title": "North Pier ticketing",
+    "excerpt": "The North Pier window sells return tickets. Online ticketing is listed at ferry.lanternbay.example.",
     "tags": [
       "ferry",
       "boat",
@@ -166,6 +167,7 @@
       "North Pier"
     ],
     "source_name": "Lantern Bay Ferry",
+    "domain": "ferry.lanternbay.example",
     "source_type": "official",
     "source_group": "official",
     "date": 1794673800,
@@ -178,7 +180,7 @@
   {
     "id": "ferry-domain-record",
     "title": "About lanternbay-ferry.example",
-    "excerpt": "This address was registered three days before Lantern Night. It is separate from ferry.lanternbay.example.",
+    "excerpt": "Registration details for lanternbay-ferry.example, an address first recorded three days before Lantern Night.",
     "tags": [
       "ferry",
       "ticket",
@@ -186,6 +188,8 @@
       "lanternbay-ferry.example"
     ],
     "source_name": "Domain Record Archive",
+    "domain": "lanternbay-ferry.example",
+    "domain_registered": 1794387600,
     "source_type": "domain_record",
     "source_group": "web",
     "date": 1794387600,

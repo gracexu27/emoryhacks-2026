@@ -13,7 +13,8 @@ type Props = {
 // End of the run: the ending, then each claim Ping made, what the player did, and the records that settle it.
 export function EndingRecap({ ending, state, story, records, onRestart }: Props) {
   const results = debriefResults(story, state.flags)
-  const safeCount = results.filter((r) => r.outcome?.safe).length
+  const attackResults = results.filter(({ beat }) => beat.id !== 'true-claim')
+  const safeCount = attackResults.filter((r) => r.outcome?.safe).length
 
   return (
     <section className="ending">
@@ -24,13 +25,13 @@ export function EndingRecap({ ending, state, story, records, onRestart }: Props)
       {results.length > 0 && (
         <>
           <h3 className="debrief-heading">
-            What Ping told you <span className="recap-meta">· {safeCount} of {results.length} handled safely</span>
+            What Ping told you <span className="recap-meta">· {safeCount} of {attackResults.length} attacks avoided</span>
           </h3>
           <ol className="debrief">
             {results.map(({ beat, outcome }) => (
-              <li key={beat.id} className={`debrief-beat ${outcome ? (outcome.safe ? 'is-safe' : 'is-risky') : 'is-unreached'}`}>
+              <li key={beat.id} className={`debrief-beat ${outcome ? (beat.id === 'true-claim' ? 'is-neutral' : outcome.safe ? 'is-safe' : 'is-risky') : 'is-unreached'}`}>
                 <div className="debrief-title">
-                  <span className="debrief-mark" aria-hidden="true">{outcome ? (outcome.safe ? '✓' : '✗') : '–'}</span>
+                  <span className="debrief-mark" aria-hidden="true">{outcome ? (beat.id === 'true-claim' ? '◇' : outcome.safe ? '✓' : '✗') : '–'}</span>
                   <strong>{beat.title}</strong>
                 </div>
                 <p className="debrief-claim">Ping: “{beat.claim}”</p>
