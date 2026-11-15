@@ -41,7 +41,9 @@ The player clicks objects in a pixel-art scene, reads their details in legible p
 - The app now has a grouped search UI, filters, date and source badges, archive results pinned on the town art, a clock, notebook, scene engine, and a basic ending. These are a walking skeleton, not a complete playthrough.
 - `content/scenes.json` has the full route (ferry → dinner → Wi-Fi → encore), four endings including missed-ferry, and the debrief; most narration is still `TODO-CONTENT`.
 - The opening ferry scene now has an original full-screen pixel map, title screen, on-map controls, and archive/notebook/pause overlays. Clicking a result title opens a record detail view in the archive window (all fields, pin button); Calla's “View page source” lives only there, never on search cards.
-- **Deployed on Vultr** at `http://64.177.55.92` (Atlanta, Ubuntu 24.04, 1 vCPU / 2 GB). Custom domain + HTTPS still to do.
+- **Live at https://pingmehome.us** (Porkbun `.us` domain, A records `@` and `www` → Vultr `64.177.55.92`, Atlanta, Ubuntu 24.04, 1 vCPU / 2 GB).
+  - HTTPS: Let's Encrypt certificate (auto-renews via the certbot timer, webroot `/var/www/letsencrypt`; `certbot renew --dry-run` passes). Every http, www and bare-IP request 301-redirects to `https://pingmehome.us`; HSTS is on (1 day).
+  - `.env.production.local` points the browser at `https://pingmehome.us:443/typesense`.
   - Typesense 30.2 runs in Docker bound to `127.0.0.1:8108` (not reachable from the internet). Its admin key lives only in `/root/typesense.env` on the server and in the local gitignored `.env.deploy`.
   - nginx serves `dist/` from `/var/www/lantern-bay` and proxies **only** `POST /typesense/multi_search` (rate-limited, 64 KB body cap) and `/typesense/health`; every other `/typesense/*` path returns 404. Strict CSP and security headers are set. UFW allows 22/80/443; SSH is key-only.
   - `npm run deploy` builds with `.env.production.local` (gitignored: server host, `VITE_TYPESENSE_PATH=/typesense`, the server's search-only key), refuses to ship if an admin key is in `dist/`, then uploads.

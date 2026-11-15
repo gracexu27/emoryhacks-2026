@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <title>A Guide to Getting Lost</title>
+  <!-- night tile -->
+  <rect width="16" height="16" rx="3" fill="#13233a"/>
+  <!-- hook -->
+  <rect x="7" y="1" width="2" height="2" fill="#f1be85"/>
+  <!-- top cap -->
+  <rect x="5" y="3" width="6" height="1" fill="#7a3b3b"/>
+  <!-- lantern body -->
+  <rect x="4" y="4" width="8" height="8" fill="#d9483b"/>
+  <rect x="3" y="5" width="10" height="6" fill="#d9483b"/>
+  <!-- warm glow -->
+  <rect x="5" y="5" width="6" height="6" fill="#f2944a"/>
+  <rect x="6" y="6" width="4" height="4" fill="#ffc46b"/>
+  <rect x="7" y="7" width="2" height="2" fill="#fff1c9"/>
+  <!-- ribs -->
+  <rect x="4" y="7" width="1" height="2" fill="#a8322c"/>
+  <rect x="11" y="7" width="1" height="2" fill="#a8322c"/>
+  <!-- bottom cap and tassel -->
+  <rect x="5" y="12" width="6" height="1" fill="#7a3b3b"/>
+  <rect x="7" y="13" width="2" height="2" fill="#69e1cc"/>
+</svg>
